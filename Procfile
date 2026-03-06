@@ -1,0 +1,1 @@
+web: uvicorn automate_dashboard_report:app --host=0.0.0.0 --port=${PORT}

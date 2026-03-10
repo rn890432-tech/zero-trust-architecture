@@ -259,3 +259,5 @@ For questions or further customization, contact your SOC engineering team or req
 
 For further customization, request code for specific backend endpoints, advanced workflow logic, or integration with SIEM/ITSM platforms.
 # zero-trust-architecture
+#   z e r o - t r u s t - a r c h i t e c t u r e  
+ 

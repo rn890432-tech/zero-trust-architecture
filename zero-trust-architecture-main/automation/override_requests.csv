@@ -1,0 +1,1 @@
+request_id,timestamp,requested_by,reason,status,approvals_required,approvals_received,approved_by,rejected_by,retraining_triggered,expires_at,reminder_sent,digest_sent,escalation_level,escalation_history,resolved_at

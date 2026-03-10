@@ -1,0 +1,4 @@
+Time,Event,Severity,Status
+08:15,Unauthorized login attempt detected,Critical,Investigating
+09:02,Firewall rule updated,Warning,Completed
+10:30,Backup completed,Info,Success

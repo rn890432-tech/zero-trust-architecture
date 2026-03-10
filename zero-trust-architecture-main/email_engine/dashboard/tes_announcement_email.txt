@@ -1,0 +1,14 @@
+Subject: Introducing Our Transactional Email Service (TES)
+
+Dear Team,
+
+We’re excited to announce the rollout of our new Transactional Email Service (TES) — a modern SaaS‑grade email engine built to power critical communications like password resets, verification codes, receipts, onboarding, alerts, and system notifications.
+
+Unlike marketing email, TES is designed to be fast, reliable, audit‑friendly, compliant, and highly deliverable. It integrates seamlessly with providers like SES, SendGrid, Mailgun, and Postmark, while offering failover routing, bounce suppression, and detailed analytics.
+
+Over the coming phases, TES will expand with compliance features, opt‑out preferences, rate limiting, IP warmup, and advanced dashboards for tracking and SLA monitoring.
+
+This system ensures our communications remain secure, scalable, and trusted — keeping users informed and protected at every step.
+
+Best regards,
+Richard.

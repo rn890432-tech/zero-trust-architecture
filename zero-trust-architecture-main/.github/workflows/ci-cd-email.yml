@@ -1,0 +1,44 @@
+name: CI/CD Email Notification
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Dashboard Pipeline", "CI/CD Security & Notification"]
+    types:
+      - completed
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email via SendGrid
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.sendgrid.net
+          server_port: 587
+          username: apikey
+          password: ${{ secrets.SENDGRID_API_KEY }}
+          subject: "CI/CD Pipeline Failed for ${{ github.repository }}"
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: ${{ secrets.NOTIFY_EMAIL }}
+          body: |
+            The CI/CD pipeline for ${{ github.repository }} failed.
+            Workflow: ${{ github.event.workflow_run.name }}
+            Status: ${{ github.event.workflow_run.conclusion }}
+            See details: ${{ github.event.workflow_run.html_url }}
+      - name: Send email via SMTP (fallback)
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "CI/CD Pipeline Failed for ${{ github.repository }}"
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: ${{ secrets.NOTIFY_EMAIL }}
+          body: |
+            The CI/CD pipeline for ${{ github.repository }} failed.
+            Workflow: ${{ github.event.workflow_run.name }}
+            Status: ${{ github.event.workflow_run.conclusion }}
+            See details: ${{ github.event.workflow_run.html_url }}

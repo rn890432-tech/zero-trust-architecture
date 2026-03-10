@@ -1,0 +1,31 @@
+[PowerPoint file placeholder: Defense-in-Depth Summary Slide]
+
+Instructions:
+- Open this file in PowerPoint.
+- Add your organization’s logo to the top right.
+- Update colors to match your branding.
+- Edit the table to reflect your current controls and artifacts.
+- Add custom notes or talking points in the notes section below the slide.
+
+Slide Layout:
+Title: Defense-in-Depth Summary: Cloud & Identity Security Posture (Q1 2026)
+Table:
+| Pillar        | Focus Area      | Key Control Implemented                | Audit Artifact                |
+|---------------|----------------|----------------------------------------|-------------------------------|
+| Identity      | Access Entry    | Phishing-Resistant MFA & OAuth Governance | IAM_01_MFA_Policy.pdf         |
+| Entitlements  | Blast Radius    | Just-In-Time (JIT) Admin Access (PIM)  | ENT_01_PIM_Logs.csv           |
+| Data          | Exposure        | Global “Block Public Access” (BPA)     | DATA_01_BPA_Config.png        |
+
+Strategic Narrative (add to notes):
+- Identity: AiTM phishing risks, managed OAuth consent, session revocation.
+- Entitlements: No standing access, JIT elevation, minimized blast radius.
+- Data: Platform-level protection, private-by-default storage.
+
+Compliance Maturity:
+- Control Coverage: 100% of defined controls
+- Testing Frequency: Monthly automation + annual external audit
+- Remediation Status: 0 critical/high findings; low findings tracked in POA&M
+
+Pro-Tip Response:
+If asked about JIT admin compromise:
+> Our SOC is alerted on every PIM elevation. If paired with an anomalous login, we trigger ‘Global Token Revocation’ via our Kill-Switch SOP.

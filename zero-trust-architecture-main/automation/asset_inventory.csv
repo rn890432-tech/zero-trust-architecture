@@ -1,0 +1,4 @@
+AssetID,Hostname,IP,OS,Owner,Location,Status
+A001,server01,10.0.0.1,Windows Server 2022,IT,Data Center 1,Active
+A002,server02,10.0.0.2,Ubuntu 22.04,Dev,Data Center 2,Active
+A003,workstation01,10.0.1.10,Windows 11,Finance,Office,Inactive

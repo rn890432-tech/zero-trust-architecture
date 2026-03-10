@@ -1,0 +1,93 @@
+# Email and Slack Automation Scripts
+
+# --- Python Email Automation ---
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+import requests
+import sys
+import os
+
+# CONFIGURABLE
+sender = 'jasonnorman66994@gmail.com'
+password = 'dlijpyyetrtoxttb'
+recipients = ['jasonnorman66994@gmail.com', 'another@email.com']  # Add more as needed
+slack_webhook_url = 'https://hooks.slack.com/services/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'  # User's Slack webhook
+subject = 'Zero Trust Archive Notification'
+body = 'Archive and signature created. See log summary below.'
+
+# Read log summary file if provided
+log_summary = ''
+if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+    with open(sys.argv[1], 'r') as f:
+        log_summary = f.read()
+
+# Attach archive and signature
+archive_path = 'archives/audit-2026-02-20.tar.gz'  # Update as needed
+sig_path = 'archives/audit-2026-02-20.tar.gz.sig'  # Update as needed
+attachments = [archive_path, sig_path]
+
+msg = MIMEMultipart()
+msg['From'] = sender
+msg['To'] = ', '.join(recipients)
+msg['Subject'] = subject
+msg.attach(MIMEText(body + '\n\n' + log_summary, 'plain'))
+
+for file in attachments:
+    if os.path.exists(file):
+        with open(file, 'rb') as f:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(f.read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f'attachment; filename={os.path.basename(file)}')
+        msg.attach(part)
+
+try:
+    with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        server.starttls()
+        server.login(sender, password)
+        server.sendmail(sender, recipients, msg.as_string())
+    print('Email sent successfully!')
+except Exception as e:
+    print(f'Error sending email: {e}')
+
+# Slack notification
+slack_message = {
+    'text': f'{subject}\n{body}\n\nLog Summary:\n{log_summary}'
+}
+try:
+    response = requests.post(slack_webhook_url, json=slack_message)
+    if response.status_code == 200:
+        print('Slack notification sent!')
+    else:
+        print(f'Slack error: {response.text}')
+except Exception as e:
+    print(f'Error sending Slack notification: {e}')
+
+# --- PowerShell Email Automation ---
+# Save this section as .ps1 if needed
+# Requires PowerShell 5.1 or later
+#
+# $to = 'jasonnorman66994@gmail.com','another@email.com'
+# $from = 'jasonnorman66994@gmail.com'
+# $subject = 'Zero Trust Archive Notification'
+# $body = Get-Content 'log_summary.txt' | Out-String
+# $smtp = 'smtp.gmail.com'
+# $port = 587
+# $cred = New-Object System.Management.Automation.PSCredential($from, (ConvertTo-SecureString 'dlijpyyetrtoxttb' -AsPlainText -Force))
+# $attachments = @('archives/audit-2026-02-20.tar.gz','archives/audit-2026-02-20.tar.gz.sig')
+# Send-MailMessage -To $to -From $from -Subject $subject -Body $body -SmtpServer $smtp -Port $port -UseSsl -Credential $cred -Attachments $attachments
+#
+# For Slack, use Invoke-RestMethod:
+# $slack_webhook_url = 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+# $slack_message = @{ text = "$subject`n$body`n`nLog Summary:`n$body" }
+# Invoke-RestMethod -Uri $slack_webhook_url -Method Post -Body ($slack_message | ConvertTo-Json)
+
+# --- Scheduling ---
+# Use Task Scheduler to run the Python script every hour.
+# Or use Windows Scheduled Tasks for PowerShell.
+
+# --- Daily/Weekly Summary ---
+# Add logic to aggregate logs and send summary emails/slack messages as needed.

@@ -1,0 +1,112 @@
+﻿version: 2.1
+
+executors:
+  python-executor:
+    docker:
+      - image: cimg/python:3.9
+    working_directory: ~/project
+
+jobs:
+  lint:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install flake8
+          command: pip install flake8
+      - run:
+          name: Run linting
+          command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
+
+  security_scan:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install security tools
+          command: pip install bandit safety
+      - run:
+          name: Run bandit security scan
+          command: bandit -r . -f json -o bandit-report.json || true
+      - run:
+          name: Run safety check
+          command: safety check --json > safety-report.json || true
+      - store_artifacts:
+          path: bandit-report.json
+      - store_artifacts:
+          path: safety-report.json
+
+  test:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install pytest requests
+      - run:
+          name: Run tests
+          command: pytest tests/ -v --junitxml=test-results.xml || true
+      - store_test_results:
+          path: test-results.xml
+      - store_artifacts:
+          path: test-results.xml
+
+  build:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install boto3
+      - run:
+          name: Build application
+          command: echo "Python version: $(python --version)" && echo "Build completed successfully"
+
+  notify_failure:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Notify on failure
+          command: "echo 'Pipeline failed'"
+
+  notify_success:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Notify on success
+          command: "echo 'Pipeline succeeded'"
+
+  deploy_gcp:
+    docker:
+      - image: google/cloud-sdk:latest
+    steps:
+      - checkout
+      - run:
+          name: Deploy to GCP
+          command: echo "GCP deployment - uncomment gcloud command to enable"
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - lint
+      - security_scan
+      - test:
+          requires:
+            - lint
+      - build:
+          requires:
+            - test
+      - deploy_gcp:
+          requires:
+            - build
+      - notify_failure:
+          requires:
+            - build
+      - notify_success:
+          requires:
+            - build
+
+

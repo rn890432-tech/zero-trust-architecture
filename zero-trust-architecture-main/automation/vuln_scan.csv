@@ -1,0 +1,4 @@
+ScanID,AssetID,Hostname,Severity,Finding,Status,Detected,Remediated
+S001,A001,server01,Critical,Open RDP port,Open,2026-02-20,No
+S002,A002,server02,High,Outdated kernel,Open,2026-02-19,No
+S003,A003,workstation01,Medium,Missing patches,Closed,2026-02-15,2026-02-18

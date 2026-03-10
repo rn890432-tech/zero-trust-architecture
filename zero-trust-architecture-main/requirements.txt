@@ -1,0 +1,15 @@
+pytest
+boto3
+uvicorn
+fastapi
+pydantic
+slowapi
+pyjwt
+requests
+pdfkit
+msal
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+python-multipart
+charset_normalizer

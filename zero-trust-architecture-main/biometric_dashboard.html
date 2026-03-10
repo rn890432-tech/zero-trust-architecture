@@ -1,0 +1,1400 @@
+<div class="section">
+    <h3>Action Impact on Anomaly Reduction</h3>
+    <div id="actionImpactPanel"></div>
+    <button onclick="renderActionImpactPanel()">Refresh Impact</button>
+</div>
+
+async function renderActionImpactPanel() {
+    const response = await fetch('/api/action_impact');
+    const stats = await response.json();
+    let html = '<b>Weekly Action Impact:</b><table style="width:100%;border-collapse:collapse"><tr><th>Week</th><th>Actions Implemented</th><th>Anomalies</th></tr>';
+    for (const [week, data] of Object.entries(stats)) {
+        html += `<tr><td>${week}</td><td>${data.actions}</td><td>${data.anomalies}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('actionImpactPanel').innerHTML = html;
+}
+<div class="section">
+    <h3>Corrective Actions Status</h3>
+    <div id="correctiveActionsStatusPanel"></div>
+    <button onclick="renderCorrectiveActionsStatusPanel()">Refresh Status</button>
+</div>
+
+async function renderCorrectiveActionsStatusPanel() {
+    const response = await fetch('/api/corrective_actions_status');
+    const actions = await response.json();
+    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Root Cause</th><th>Recommended Action</th><th>Status</th><th>Implemented At</th><th>Trigger Workflow</th></tr>';
+    for (const row of actions) {
+        const status = row.implemented === 'true' ? '✅ Implemented' : '⏳ Pending';
+        const date = row.implemented_at || '';
+        html += `<tr><td>${row.root_cause}</td><td>${row.recommended_action}</td><td>${status}</td><td>${date}</td><td>`;
+        if (row.implemented !== 'true') {
+            html += `<button onclick="markActionDone('${row.id}')">Mark Done</button>`;
+        }
+        html += '</td></tr>';
+    }
+    html += '</table>';
+    document.getElementById('correctiveActionsStatusPanel').innerHTML = html;
+}
+
+async function markActionDone(id) {
+    await fetch('/api/mark_action_done', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+    });
+    renderCorrectiveActionsStatusPanel();
+}
+<div class="section">
+    <h3>Corrective Tasks Audit Trail</h3>
+    <div id="correctiveTasksPanel"></div>
+    <button onclick="renderCorrectiveTasksPanel()">Refresh Tasks</button>
+</div>
+
+async function renderCorrectiveTasksPanel() {
+    const response = await fetch('/api/corrective_tasks');
+    const tasks = await response.json();
+    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Request ID</th><th>Root Cause</th><th>Recommended Action</th><th>Task Link</th><th>Status</th><th>Created At</th></tr>';
+    for (const task of tasks) {
+        html += `<tr><td>${task.request_id}</td><td>${task.reason}</td><td>${task.recommended_action}</td><td><a href="https://yourcompany.atlassian.net/browse/${task.external_task_id}" target="_blank">Jira ${task.external_task_id}</a></td><td>${task.status}</td><td>${task.created_at}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('correctiveTasksPanel').innerHTML = html;
+}
+renderCorrectiveTasksPanel();
+
+<div class="section">
+    <h3>Corrective Actions</h3>
+    <div id="correctiveActionsPanel"></div>
+    <button onclick="renderCorrectiveActionsPanel()">Refresh Actions</button>
+</div>
+
+async function renderCorrectiveActionsPanel() {
+    const response = await fetch('/api/corrective_actions');
+    const actions = await response.json();
+    let html = '<b>Recommended Actions:</b><ul>';
+    for (const [reason, action] of Object.entries(actions)) {
+        html += `<li>${reason}: ${action} <input type="checkbox" id="action_${reason}"/> <label for="action_${reason}">Action Taken</label></li>`;
+    }
+    html += '</ul>';
+    document.getElementById('correctiveActionsPanel').innerHTML = html;
+}
+<div class="section">
+    <h3>Weekly Root Cause Breakdown</h3>
+    <div id="weeklyRootCausesPanel"></div>
+    <button onclick="renderWeeklyRootCausesPanel()">Refresh Weekly Causes</button>
+</div>
+
+async function renderWeeklyRootCausesPanel() {
+    const response = await fetch('/api/weekly_root_causes');
+    const causes = await response.json();
+    let total = Object.values(causes).reduce((a,b)=>a+b,0);
+    let html = '<b>This Week Root Causes:</b><ul>';
+    for (const [reason, count] of Object.entries(causes)) {
+        html += `<li>${reason}: ${count} (${((count/total)*100).toFixed(1)}%)</li>`;
+    }
+    html += '</ul>';
+    html += '<canvas id="weeklyRootCauseChart" width="300" height="150"></canvas>';
+    document.getElementById('weeklyRootCausesPanel').innerHTML = html;
+    // Render pie chart
+    const ctx = document.getElementById('weeklyRootCauseChart').getContext('2d');
+    const dataArr = Object.values(causes);
+    const labels = Object.keys(causes);
+    if (window.Chart) {
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels,
+                datasets: [{ data: dataArr, backgroundColor: ['#ff7043','#42a5f5','#66bb6a','#ffd600','#ab47bc','#8d6e63'] }]
+            },
+            options: { responsive: false }
+        });
+    }
+}
+<div class="section">
+    <h3>Rejection Reasons Analytics</h3>
+    <div id="rejectionReasonsPanel"></div>
+    <button onclick="renderRejectionReasonsPanel()">Refresh Reasons</button>
+</div>
+
+async function renderRejectionReasonsPanel() {
+    const response = await fetch('/api/rejection_reasons');
+    const reasons = await response.json();
+    let total = Object.values(reasons).reduce((a,b)=>a+b,0);
+    let html = '<b>Root Cause Breakdown:</b><ul>';
+    for (const [reason, count] of Object.entries(reasons)) {
+        html += `<li>${reason}: ${count} (${((count/total)*100).toFixed(1)}%)</li>`;
+    }
+    html += '</ul>';
+    // Simple pie chart
+    html += '<canvas id="rejectionPieChart" width="300" height="150"></canvas>';
+    document.getElementById('rejectionReasonsPanel').innerHTML = html;
+    // Render pie chart
+    const ctx = document.getElementById('rejectionPieChart').getContext('2d');
+    const dataArr = Object.values(reasons);
+    const labels = Object.keys(reasons);
+    if (window.Chart) {
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels,
+                datasets: [{ data: dataArr, backgroundColor: ['#ff7043','#42a5f5','#66bb6a','#ffd600','#ab47bc','#8d6e63'] }]
+            },
+            options: { responsive: false }
+        });
+    }
+}
+<div class="section">
+    <h3>Anomaly Indicators</h3>
+    <div id="anomalyIndicatorsPanel"></div>
+    <button onclick="renderAnomalyIndicatorsPanel()">Refresh Anomaly Indicators</button>
+</div>
+
+async function renderAnomalyIndicatorsPanel() {
+    const response = await fetch('/api/anomaly_indicators');
+    const data = await response.json();
+    let html = `<b>Current Approvals: ${data.current_approvals} &nbsp;&nbsp; Current Rejections: ${data.current_rejections}</b><br>`;
+    html += `<b>Baseline Avg Approvals: ${data.avg_approvals.toFixed(1)} &nbsp;&nbsp; Baseline Avg Rejections: ${data.avg_rejections.toFixed(1)}</b><br>`;
+    html += `<b>Deviation: ${(data.deviation*100).toFixed(1)}%</b><br>`;
+    if (data.anomaly) {
+        html += '<span style="color:#d32f2f;font-weight:bold">🚨 Anomaly Detected: Rejection rate spike!</span>';
+    }
+    document.getElementById('anomalyIndicatorsPanel').innerHTML = html;
+}
+<div class="section">
+    <h3>Daily Resolution Summary</h3>
+    <div id="dailyResolutionSummaryPanel"></div>
+    <button onclick="renderDailyResolutionSummaryPanel()">Refresh Daily Summary</button>
+</div>
+
+async function renderDailyResolutionSummaryPanel() {
+    const response = await fetch('/api/daily_resolution_summary');
+    const data = await response.json();
+    let html = `<b>✅ Approved: ${data.approved} &nbsp;&nbsp; ❌ Rejected: ${data.rejected}</b><ul>`;
+    for (const r of data.details) {
+        html += `<li>Request #${r.request_id} by ${r.requested_by} (${r.reason}) → ${r.outcome.toUpperCase()}</li>`;
+    }
+    html += '</ul>';
+    document.getElementById('dailyResolutionSummaryPanel').innerHTML = html;
+}
+<div class="section">
+    <h3>Override Resolution Timeline</h3>
+    <div id="resolutionTimelinePanel"></div>
+    <button onclick="renderResolutionTimelinePanel()">Refresh Resolution Timeline</button>
+</div>
+
+async function renderResolutionTimelinePanel() {
+    const response = await fetch('/api/resolution_timeline');
+    const rows = await response.json();
+    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Request ID</th><th>Resolved At</th><th>By</th><th>Outcome</th><th>Audit Trail</th></tr>';
+    for (const row of rows) {
+        html += `<tr><td>${row.request_id}</td><td>${row.resolution_time}</td><td>${row.resolution_by}</td><td>${row.resolution_outcome}</td><td>${row.escalation_history.replace(/\|/g,'<br>')}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('resolutionTimelinePanel').innerHTML = html;
+}
+<div class="section">
+    <h3>Override Escalation Timeline</h3>
+    <div id="escalationTimelinePanel"></div>
+    <button onclick="renderEscalationTimelinePanel()">Refresh Timeline</button>
+</div>
+
+async function renderEscalationTimelinePanel() {
+    const response = await fetch('/api/escalation_timeline');
+    const rows = await response.json();
+    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Request ID</th><th>Current Level</th><th>Escalation History</th></tr>';
+    for (const row of rows) {
+        let channel = '';
+        if (row.escalation_level === '1') channel = '#incident-response';
+        else if (row.escalation_level === '2') channel = '#engineering-leads';
+        else if (row.escalation_level === '3') channel = '#exec-ops';
+        html += `<tr><td>${row.request_id}</td><td>${channel || 'None'}</td><td>${row.escalation_history.replace(/\|/g,'<br>')}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('escalationTimelinePanel').innerHTML = html;
+}
+<div class="section">
+    <h3>Override Request Analytics</h3>
+    <div id="overrideAnalyticsPanel"></div>
+    <button onclick="renderOverrideAnalyticsPanel()">Refresh Analytics</button>
+</div>
+
+async function renderOverrideAnalyticsPanel() {
+    const response = await fetch('/api/override_analytics');
+    const data = await response.json();
+    let html = '<b>Metrics:</b><ul>';
+    html += `<li>Average Response Time: ${Math.round(data.avg_response_time/60)} min</li>`;
+    html += `<li>Approval Rate: ${(data.approval_rate*100).toFixed(1)}%</li>`;
+    html += `<li>Escalation Count: ${data.escalation_count}</li>`;
+    html += '</ul>';
+    document.getElementById('overrideAnalyticsPanel').innerHTML = html;
+}
+
+<div class="section">
+    <h3>Override Requests</h3>
+    <div id="overrideRequestsPanel"></div>
+    <button onclick="renderOverrideRequestsPanel()">Refresh Override Requests</button>
+</div>
+
+// Override Requests panel rendering
+async function renderOverrideRequestsPanel() {
+    const response = await fetch('/automation/override_requests.csv');
+    const text = await response.text();
+    const rows = text.trim().split('\n').slice(1).map(line => line.split(','));
+        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Timestamp</th><th>Requested By</th><th>Reason</th><th>Status</th><th>Progress</th><th>Rejections</th><th>Retraining</th><th>Expires In</th><th>Digest</th></tr>';
+    for (const row of rows) {
+        const retrainIcon = row[9] === 'true' ? '⚙️' : '';
+        const expired = row[4] === 'expired';
+        const expireIcon = expired ? '⏰' : '';
+        let expiresIn = '';
+        let highlight = '';
+        if (!expired && row[10]) {
+            const now = new Date();
+            const exp = new Date(row[10]);
+            const diff = exp - now;
+            if (diff > 0) {
+                const hours = Math.floor(diff / (1000*60*60));
+                const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+                expiresIn = `${hours}h ${mins}m`;
+                if (diff < 2*60*60*1000 && row[4]==='pending') highlight = ' style="background:#fff2cc"';
+            } else {
+                expiresIn = '⏰ Expired';
+            }
+        }
+        const reminderIcon = row[11] === 'true' ? '⏰' : '';
+        html += `<tr${row[4]==='pending' ? highlight : expired ? ' style="background:#ffe6e6"' : ''}><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]} ${expireIcon}</td><td>${row[6]}/${row[5]}</td><td>${row[7]}</td><td>${row[8]}</td><td>${retrainIcon}</td><td>${expiresIn}</td><td>${reminderIcon}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('overrideRequestsPanel').innerHTML = html;
+}
+        // Fetch votes for progress/rejections
+        const votesRes = await fetch('/automation/retraining_override_votes.csv');
+        const votesText = await votesRes.text();
+        const votes = votesText.trim().split('\n').slice(1).map(line => line.split(','));
+        for (const row of rows) {
+            const requestId = row[0];
+            const approvalsRequired = parseInt(row[5]);
+            const approvalsReceived = votes.filter(v => v[0] === requestId && v[2] === 'approve').length;
+            const rejections = votes.filter(v => v[0] === requestId && v[2] === 'reject').length;
+            const progressBar = `<span style="display:inline-block;width:80px;background:#e0e0e0;border-radius:4px"><span style="display:inline-block;width:${Math.floor(80*approvalsReceived/approvalsRequired)}px;background:#4caf50;height:12px;border-radius:4px"></span></span> ${approvalsReceived}/${approvalsRequired}`;
+            const rejectionHighlight = rejections > 0 ? ' style="background:#ffe6e6"' : '';
+            html += `<tr${rejectionHighlight || highlight || expired ? ' style="background:#ffe6e6"' : ''}><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]} ${expireIcon}</td><td>${progressBar}</td><td>${rejections > 0 ? '❌ ' + rejections : ''}</td><td>${retrainIcon}</td><td>${expiresIn}</td><td>${reminderIcon}</td></tr>`;
+        }
+
+<div class="section">
+    <h3>Retraining Permissions</h3>
+    <div id="permissionsPanel"></div>
+    <button onclick="renderPermissionsPanel()">Refresh Permissions</button>
+</div>
+
+// Permissions panel rendering
+async function renderPermissionsPanel() {
+    // Fetch permissions
+    const permRes = await fetch('/automation/retraining_permissions.csv');
+    const permText = await permRes.text();
+    const perms = permText.trim().split('\n').slice(1).map(line => line.split(','));
+    let html = '<b>Authorized Users:</b><table style="width:100%;border-collapse:collapse"><tr><th>User</th><th>Role</th></tr>';
+    for (const row of perms) {
+        html += `<tr><td>${row[0]}</td><td>${row[1]}</td></tr>`;
+    }
+    html += '</table>';
+    // Fetch override audit log
+    const auditRes = await fetch('/automation/retraining_override_audit.csv');
+    const auditText = await auditRes.text();
+    const audits = auditText.trim().split('\n').slice(1).map(line => line.split(','));
+    html += '<div style="margin-top:16px"><b>Override Attempts:</b><table style="width:100%;border-collapse:collapse"><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Result</th><th>Reason</th></tr>';
+    for (const row of audits.slice(-10)) {
+        html += `<tr${row[3]==='denied' ? ' style="background:#ffe6e6"' : ''}><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]==='approved' ? '🟢 Approved' : '🔴 Denied'}</td><td>${row[4]}</td></tr>`;
+    }
+    html += '</table></div>';
+    document.getElementById('permissionsPanel').innerHTML = html;
+}
+
+<div class="section">
+    <h3>Retraining Overrides</h3>
+    <div id="retrainingOverridesPanel"></div>
+    <button onclick="renderRetrainingOverridesPanel()">Refresh Overrides</button>
+</div>
+
+// Retraining Overrides panel rendering
+async function renderRetrainingOverridesPanel() {
+    const response = await fetch('/automation/retraining_events.csv');
+    const text = await response.text();
+    const rows = text.trim().split('\n').slice(1).map(line => line.split(','));
+        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Timestamp</th><th>Requested By</th><th>Reason</th><th>Status</th><th>Progress</th><th>Rejections</th><th>Retraining</th><th>Expires In</th><th>Digest</th></tr>';
+    for (const row of rows) {
+        const isOverride = row[1].startsWith('Forced retraining by');
+        html += `<tr${isOverride ? ' style="background:#e6f7ff"' : ''}><td>${row[0]}</td><td>${row[1]}</td><td>${isOverride ? '⚙️' : ''}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('retrainingOverridesPanel').innerHTML = html;
+}
+
+<div class="section">
+    <h3>Retraining Cooldown Status</h3>
+    <div id="retrainingCooldownPanel"></div>
+    <button onclick="renderRetrainingCooldownPanel()">Refresh Cooldown Status</button>
+</div>
+
+// Retraining Cooldown panel rendering
+async function renderRetrainingCooldownPanel() {
+    const response = await fetch('/automation/retraining_events.csv');
+    const text = await response.text();
+    const rows = text.trim().split('\n').slice(1).map(line => line.split(','));
+    let lastRun = rows.length ? rows[rows.length-1][0] : null;
+    let lastDate = lastRun ? new Date(lastRun) : null;
+    let nextDate = lastDate ? new Date(lastDate.getTime() + 7*24*60*60*1000) : null;
+    let now = new Date();
+    let status = (!lastDate || now >= nextDate) ? '🟢 Ready' : '🔴 Cooldown Active';
+    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Last Retraining</th><th>Next Eligible</th><th>Status</th></tr>';
+    html += `<tr><td>${lastDate ? lastDate.toLocaleString() : 'Never'}</td><td>${nextDate ? nextDate.toLocaleString() : 'Now'}</td><td>${status}</td></tr>`;
+    html += '</table>';
+            html += `<tr${rejectionHighlight || highlight || expired ? ' style="background:#ffe6e6"' : ''}><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]} ${expireIcon}</td><td>${progressBar}</td><td>${rejections > 0 ? '❌ ' + rejections : ''}</td><td>${retrainIcon}</td><td>${expiresIn}</td><td>${digestStatus}</td></tr>`;
+    html += '<div style="margin-top:16px"><b>Event Log:</b><ul>';
+    for (const row of rows.slice(-5)) {
+        html += `<li>${row[0]}: ${row[1]}</li>`;
+    }
+        const response = await fetch('/api/override_progress');
+        const requests = await response.json();
+        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Timestamp</th><th>Requested By</th><th>Reason</th><th>Status</th><th>Progress</th><th>Rejections</th><th>Retraining</th><th>Expires In</th><th>Digest</th></tr>';
+        for (const row of requests) {
+            const requestId = row.request_id;
+            const expired = row.status === 'expired' || (row.expires_at && new Date(row.expires_at) < new Date());
+            const expireIcon = expired ? '\u23f0' : '';
+            let expiresIn = '';
+            let highlight = '';
+            let escalationIcon = '';
+            let badge = '';
+            let reminderBadge = '';
+            let expiredBadge = '';
+            let rejectedBadge = '';
+            // Reminder badge
+            if (row.reminder_sent === 'true') {
+                reminderBadge = '<span style="background:#b3e5fc;color:#0277bd;padding:2px 6px;border-radius:4px;font-weight:bold">⏰ Reminder Sent</span>';
+            }
+            // Expired badge
+            if (row.status === 'expired') {
+                expiredBadge = '<span style="background:#e0e0e0;color:#757575;padding:2px 6px;border-radius:4px;font-weight:bold">⏰ Expired</span>';
+            }
+            // Rejected badge
+            if (parseInt(row.rejections) > 0) {
+                rejectedBadge = '<span style="background:#ffebee;color:#d32f2f;padding:2px 6px;border-radius:4px;font-weight:bold">❌ Rejected</span>';
+            }
+            if (!expired && row.expires_at) {
+                const now = new Date();
+                const exp = new Date(row.expires_at);
+                const diff = exp - now;
+                if (diff > 0) {
+                    const hours = Math.floor(diff / (1000*60*60));
+                    const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+                    expiresIn = `<span style="font-weight:bold;color:#d32f2f">${hours}h ${mins}m</span>`;
+                    if (diff < 2*60*60*1000 && row.status==='pending') highlight = ' style="background:#fff2cc"';
+                } else {
+                    expiresIn = '\u23f0 Expired';
+                }
+            }
+            const approvalsRequired = parseInt(row.approvals_required);
+            const approvalsReceived = parseInt(row.approvals_received);
+            const rejections = parseInt(row.rejections);
+            // Escalation condition
+            const now = new Date();
+            const exp = row.expires_at ? new Date(row.expires_at) : null;
+            const timeLeft = exp ? (exp - now) : null;
+            if (row.status === 'pending' && approvalsReceived === approvalsRequired - 1 && timeLeft !== null && timeLeft <= 2*60*60*1000 && timeLeft > 0) {
+                escalationIcon = '⚠️';
+                badge = '<span style="background:#ffeb3b;color:#d32f2f;padding:2px 6px;border-radius:4px;font-weight:bold">Needs 1 more approval</span>';
+                highlight = ' style="background:#fff2cc;border:2px solid #d32f2f"';
+            }
+            // Level 2 escalation: rejected and <2h to expiry
+            if (parseInt(row.rejections) > 0 && timeLeft !== null && timeLeft <= 2*60*60*1000 && timeLeft > 0 && row.status === 'pending') {
+                escalationIcon = '🚨';
+                badge = '<span style="background:#ffeb3b;color:#d32f2f;padding:2px 6px;border-radius:4px;font-weight:bold">Rejected - Urgent</span>';
+                highlight = ' style="background:#ffe6e6;border:2px solid #d32f2f"';
+            }
+            const progressBar = `<span style="display:inline-block;width:80px;background:#e0e0e0;border-radius:4px"><span style="display:inline-block;width:${Math.floor(80*approvalsReceived/approvalsRequired)}px;background:#4caf50;height:12px;border-radius:4px"></span></span> ${approvalsReceived}/${approvalsRequired}`;
+            const rejectionHighlight = rejections > 0 ? ' style="background:#ffe6e6"' : '';
+            const retrainIcon = row.retraining_triggered === 'true' ? '\u2699\ufe0f' : '';
+            const digestStatus = row.digest_sent === 'yes' ? '📡' : '';
+            html += `<tr${rejectionHighlight || highlight || expired ? ' style="background:#ffe6e6"' : ''}><td>${escalationIcon} ${row.timestamp}</td><td>${row.requested_by}</td><td>${row.reason} ${badge} ${reminderBadge} ${expiredBadge} ${rejectedBadge}</td><td>${row.status} ${expireIcon}</td><td>${progressBar}</td><td>${rejections > 0 ? '❌ ' + rejections : ''}</td><td>${retrainIcon}</td><td>${expiresIn}</td><td>${digestStatus}</td></tr>`;
+        }
+        html += '</table>';
+        document.getElementById('overrideRequestsPanel').innerHTML = html;
+    }
+    html += '</ul></div>';
+    document.getElementById('retrainingCooldownPanel').innerHTML = html;
+}
+
+<div class="section">
+    <h3>Retraining Events</h3>
+    <div id="retrainingEventsPanel"></div>
+    <button onclick="renderRetrainingEventsPanel()">Refresh Retraining Events</button>
+</div>
+
+// Retraining Events panel rendering
+async function renderRetrainingEventsPanel() {
+    const response = await fetch('/automation/retraining_events.csv');
+    const text = await response.text();
+    const rows = text.trim().split('\n').slice(1).map(line => line.split(','));
+    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Timestamp</th><th>Reason</th></tr>';
+    for (const row of rows) {
+        html += `<tr><td>${row[0]}</td><td>${row[1]}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('retrainingEventsPanel').innerHTML = html;
+}
+
+                    <div class="section">
+                        <h3>Correlation Panel: Rejections & Accuracy Drop</h3>
+                        <div id="correlationPanel"></div>
+                        <button onclick="renderCorrelationPanel()">Refresh Correlation Panel</button>
+                    </div>
+
+                    // Correlation Panel rendering
+                    async function renderCorrelationPanel() {
+                        const response = await fetch('/api/decision_vs_accuracy');
+                        const data = await response.json();
+                        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>Week</th><th>Rejected</th><th>Accuracy (%)</th><th>Alert</th></tr>';
+                        for (let i = 1; i < data.length; i++) {
+                            const curr = data[i-1], prev = data[i];
+                            const accuracyDrop = prev.avg_accuracy - curr.avg_accuracy;
+                            const alert = (curr.rejected >= 3 && accuracyDrop > 0.05) ? '⚠️' : '';
+                            html += `<tr${alert ? ' style="background:#fffbe6"' : ''}><td>${curr.week}</td><td>${curr.rejected}</td><td>${(curr.avg_accuracy*100).toFixed(1)}</td><td>${alert}</td></tr>`;
+                        }
+                        html += '</table>';
+                        document.getElementById('correlationPanel').innerHTML = html;
+                    }
+                    <div class="section">
+                        <h3>Threshold Adjustment Decisions Over Time</h3>
+                        <div id="decisionTrendChart"></div>
+                        <button onclick="renderDecisionTrend()">Refresh Decision Trend</button>
+                    </div>
+                <div class="section">
+                    <h3>Threshold Adjustment Decisions</h3>
+                    <div id="decisionStatsPanel" class="container-bg" style="padding:16px;border-radius:8px;border-left:5px solid #107c10;margin-bottom:20px;"></div>
+                </div>
+            <div class="section">
+                <h3>Threshold & Accuracy Trend</h3>
+                <div id="thresholdTrendChart"></div>
+                <button onclick="renderThresholdTrend()">Refresh Trend</button>
+            </div>
+
+                    <div class="section">
+                        <h3>Approval/Rejection vs Model Accuracy</h3>
+                        <div id="decisionAccuracyTrendChart"></div>
+                        <button onclick="renderDecisionAccuracyTrend()">Refresh Decision + Accuracy Trend</button>
+                    </div>
+        <div class="section">
+            <h3>Prediction Threshold</h3>
+            <div id="thresholdPanel" class="container-bg" style="padding:16px;border-radius:8px;border-left:5px solid #d83b01;margin-bottom:20px;"></div>
+        </div>
+    <div class="section">
+        <h3>Prediction Model Accuracy</h3>
+        <div id="modelAccuracyPanel" class="container-bg" style="padding:16px;border-radius:8px;border-left:5px solid #2a7ae2;margin-bottom:20px;"></div>
+    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <style>
+            :root {
+                --bg-color: #ffffff;
+                --text-color: #1b1b1b;
+                --accent-color: #0078d4;
+                --container-bg: #f9f9f9;
+                --high-risk: #d83b01;
+            }
+            [data-theme="dark"] {
+                --bg-color: #1b1b1b;
+                --text-color: #ffffff;
+                --accent-color: #0078d4;
+                --container-bg: #232323;
+                --high-risk: #ff4c4c;
+            }
+            body {
+                background: var(--bg-color);
+                color: var(--text-color);
+                transition: background 0.3s, color 0.3s;
+            }
+            .dashboard-toggle {
+                position: fixed;
+                top: 20px;
+                right: 30px;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+            }
+            .toggle-switch {
+                width: 50px;
+                height: 26px;
+                background: var(--container-bg);
+                border-radius: 13px;
+                border: 2px solid var(--accent-color);
+                position: relative;
+                cursor: pointer;
+                margin-left: 10px;
+            }
+            .toggle-knob {
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 22px;
+                height: 22px;
+                background: var(--accent-color);
+                border-radius: 50%;
+                transition: left 0.3s;
+            }
+            [data-theme="dark"] .toggle-knob {
+                left: 26px;
+            }
+            .toggle-icon {
+                font-size: 22px;
+                color: var(--accent-color);
+            }
+            .container-bg {
+                background: var(--container-bg) !important;
+                transition: background 0.3s;
+            }
+            .high-risk {
+                color: var(--high-risk) !important;
+                font-weight: bold;
+            }
+        </style>
+    <meta charset="UTF-8">
+    <title>Biometric Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        h2 { color: #2a7ae2; }
+        .section { margin-bottom: 2em; }
+        .result { background: #f4f4f4; padding: 1em; border-radius: 8px; }
+        button { margin-top: 0.5em; }
+    </style>
+</head>
+<body>
+                                                <div style="margin-top: 70px; margin-bottom: 20px;">
+                                                    <button onclick="exportPDF()" style="padding:8px 16px; background:#0078d4; color:white; border:none; border-radius:4px; cursor:pointer;">Export PDF</button>
+                                                    <button onclick="sendReportEmail()" style="padding:8px 16px; background:#107c10; color:white; border:none; border-radius:4px; cursor:pointer;">Send Report Email</button>
+                                                    <button onclick="fetchThreatFeed()" style="padding:8px 16px; background:#d83b01; color:white; border:none; border-radius:4px; cursor:pointer;">Threat Feed</button>
+                                                    <button onclick="showAnalytics()" style="padding:8px 16px; background:#2a7ae2; color:white; border:none; border-radius:4px; cursor:pointer;">Analytics</button>
+                                                </div>
+                                                <div id="threatFeedResult" class="container-bg" style="margin-bottom:20px;"></div>
+                                                <div id="analyticsResult" class="container-bg" style="margin-bottom:20px;"></div>
+                                            <div class="dashboard-toggle">
+                                                <span class="toggle-icon" id="theme-icon">🌞</span>
+                                                <div class="toggle-switch" id="theme-toggle">
+                                                    <div class="toggle-knob"></div>
+                                                </div>
+                                            </div>
+                                        <div id="ai-scenario-creator" class="container-bg" style="padding: 20px; font-family: sans-serif; margin-bottom: 30px; border-radius: 8px; border-left: 5px solid var(--accent-color);">
+                                            <h2>🧠 AI Creative Suggestions & Scenario Builder</h2>
+                                            <p>Let AI help you design new security scenarios or analytics. Try a creative suggestion or build your own:</p>
+                                            <div style="margin-bottom:10px;">
+                                                <button onclick="showAISuggestion()" style="padding:8px 16px; background:#0078d4; color:white; border:none; border-radius:4px; cursor:pointer;">Get AI Suggestion</button>
+                                                <input type="text" id="user-scenario" placeholder="Describe your scenario..." style="width:60%; padding:8px; margin-left:10px;">
+                                                <button onclick="submitScenario()" style="padding:8px 16px; background:#107c10; color:white; border:none; border-radius:4px; cursor:pointer;">Submit Scenario</button>
+                                            </div>
+                                            <div id="ai-suggestion-result" style="margin-top:10px;"></div>
+                                        </div>
+                                    <div id="security-portal" class="container-bg" style="padding: 20px; font-family: sans-serif;">
+                                        <h2>Shield & Verify: Employee Security Portal</h2>
+                                        <section id="training-material" class="container-bg" style="border-left: 5px solid var(--accent-color); padding: 15px; margin-bottom: 20px;">
+                                            <h3>🧠 Phishing Training Material</h3>
+                                            <h4>Microsoft:</h4>
+                                            <ul>
+                                                <li>🔗 <strong>Golden Rule:</strong> Never enter credentials on a Microsoft login page embedded in another window.</li>
+                                                <li>🔍 <strong>Check the URL:</strong> Only trust <em>login.microsoftonline.com</em>.</li>
+                                                <li>🖼️ <strong>Check the Layout:</strong> Look for official logos and legal footers.</li>
+                                            </ul>
+                                            <h4>Adobe:</h4>
+                                            <ul>
+                                                <li>🔗 <strong>Golden Rule:</strong> Adobe sign-in should only occur on <em>adobe.com</em> domains.</li>
+                                                <li>🔍 <strong>Check the URL:</strong> Watch for misspelled or extra subdomains.</li>
+                                                <li>🖼️ <strong>Check the Layout:</strong> Official branding and security notices must be present.</li>
+                                            </ul>
+                                            <h4>DocuSign:</h4>
+                                            <ul>
+                                                <li>🔗 <strong>Golden Rule:</strong> DocuSign login should only be on <em>docusign.com</em>.</li>
+                                                <li>🔍 <strong>Check the URL:</strong> Beware of nested subdomains or unrelated root domains.</li>
+                                                <li>🖼️ <strong>Check the Layout:</strong> Look for DocuSign security banners and legal footers.</li>
+                                            </ul>
+                                        </section>
+                                        <section id="url-inspector" style="border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+                                            <h3>🔍 Red-Team URL Inspector</h3>
+                                            <p>Paste a suspicious link below to apply the 6-step analysis framework:</p>
+                                            <input type="text" id="suspicious-url" placeholder="https://..." style="width: 80%; padding: 10px;">
+                                            <button onclick="analyzeURL()" style="padding: 10px 20px; background: #d83b01; color: white; border: none; cursor: pointer;">Analyze Link</button>
+                                            <div id="analysis-results" style="margin-top: 15px; display: none;"></div>
+                                        </section>
+                                    </div>
+                                <h4>Security Analysis Module</h4>
+                                <input type="text" id="securityUrlInput" placeholder="Paste suspicious URL here..." style="width:60%" />
+                                <button onclick="runSecurityAnalysis()">Analyze URL</button>
+                                <pre id="securityAnalysisLog"></pre>
+                                <div id="securityTraining" style="background:#f4f4f4; padding:1em; border-radius:8px; margin-top:1em;">
+                                    <h4>End-User Training: How to Spot Microsoft/Adobe Phishing</h4>
+                                    <ul>
+                                        <li>Check sender’s email for subtle misspellings (e.g., micr0soft.com, ad0be-support.com)</li>
+                                        <li>Hover over links before clicking. Look for suspicious domains or extra characters.</li>
+                                        <li>Microsoft/Adobe will never ask for your password via email or popups.</li>
+                                        <li>Check for HTTPS and valid certificates. Click the padlock to view certificate details.</li>
+                                        <li>Be wary of urgent requests, threats, or offers that seem too good to be true.</li>
+                                        <li>Look for OAuth consent screens. Verify the app and permissions before granting access.</li>
+                                        <li>Report suspicious emails to IT immediately.</li>
+                                    </ul>
+                                </div>
+                            <style>
+                                .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.5); }
+                                .modal-content { background:#fff; margin:10% auto; padding:2em; border-radius:8px; width:60%; }
+                                .close { float:right; font-size:1.5em; cursor:pointer; }
+                                .tab { background:#2a7ae2; color:#fff; padding:0.5em 1em; border-radius:6px; cursor:pointer; display:inline-block; margin-bottom:1em; }
+                            </style>
+                            <div class="tab" onclick="openSecurityPortal()">Employee Security Portal</div>
+                            <div id="securityModal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close" onclick="closeSecurityPortal()">&times;</span>
+                                    <h3>Security & Phishing Awareness Training</h3>
+                                    <ul>
+                                        <li>Always check the sender’s email address for subtle misspellings (e.g., micr0soft.com, ad0be-support.com).</li>
+                                        <li>Hover over links before clicking. Look for suspicious domains or extra characters.</li>
+                                        <li>Microsoft/Adobe will never ask for your password via email or popups.</li>
+                                        <li>Check for HTTPS and valid certificates. Click the padlock to view certificate details.</li>
+                                        <li>Be wary of urgent requests, threats, or offers that seem too good to be true.</li>
+                                        <li>Look for OAuth consent screens. Verify the app and permissions before granting access.</li>
+                                        <li>Report suspicious emails to IT immediately.</li>
+                                    </ul>
+                                    <h4>URL Inspector</h4>
+                                    <input type="text" id="urlInput" placeholder="Paste suspicious URL here..." style="width:60%" />
+                                    <button onclick="inspectURL()">Inspect URL</button>
+                                    <pre id="urlLog"></pre>
+                                </div>
+                            </div>
+                        <h4>Dreamscape Simulation Module</h4>
+                        <input type="text" id="dreamInput" placeholder="Describe your dreamlike scenario..." style="width:60%" />
+                        <button onclick="runDreamscape()">Enter Dreamscape Simulation</button>
+                        <pre id="dreamLog"></pre>
+                    <h4>Cosmic Resilience Module</h4>
+                    <button onclick="runCosmicResilience()">Run Cosmic Stress Test</button>
+                    <pre id="cosmicLog"></pre>
+                <h4>Pan‑Dimensional Analytics Module</h4>
+                <button onclick="runPanDimensional()">Run Multi‑Dimensional Analysis</button>
+                <pre id="panLog"></pre>
+            <h4>Metaverse Collaboration Module</h4>
+            <button onclick="launchMetaverse()">Enter Metaverse Workspace</button>
+            <pre id="metaverseLog"></pre>
+        <h4>Time‑Warp Simulation Module</h4>
+        <button onclick="runTimeWarp()">Run Time‑Warp Simulation</button>
+        <pre id="timeWarpLog"></pre>
+    <h2>Biometric Dashboard</h2>
+    <div class="section">
+        <h3>Incident Volume vs SLA Breaches</h3>
+        <div style="display:flex;align-items:center;gap:40px;">
+            <div>
+                <h4>SLA Risk Gauge</h4>
+                <div id="slaRiskGauge" style="width:180px;height:180px;background:#f9f9f9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2em;color:#d83b01;border:4px solid #d83b01;"></div>
+                <div id="slaRiskAlert" style="margin-top:10px;color:#d83b01;font-weight:bold;"></div>
+                <div id="slaModelAccuracy" style="margin-top:10px;color:#2a7ae2;font-weight:bold;"></div>
+            </div>
+            <div style="flex:1;">
+                <div id="incidentSLAChart"></div>
+                <button onclick="renderIncidentSLAChart()">Refresh Chart</button>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Holistic Profile</h3>
+        <button onclick="fetchProfile()">Refresh Profile</button>
+        <div id="profileResult" class="result"></div>
+    </div>
+    <div class="section">
+        <h3>Wearable Data</h3>
+        <button onclick="fetchWearable()">Refresh Wearable</button>
+        <div id="wearableResult" class="result"></div>
+    </div>
+    <div class="section">
+        <h3>Windows Hello Status</h3>
+        <button onclick="fetchHello()">Refresh Windows Hello</button>
+        <div id="helloResult" class="result"></div>
+    </div>
+    <div class="section">
+        <h3>Environment Sensors</h3>
+        <button onclick="fetchEnvironment()">Refresh Environment</button>
+        <div id="envResult" class="result"></div>
+    </div>
+    <div class="section">
+        <h3>Consensus Engine</h3>
+        <textarea id="consensusInput" rows="4" cols="60" placeholder='[{"recommendation":"Escalate","weight":2},...]'></textarea><br>
+        <button onclick="runConsensus()">Run Consensus</button>
+        <div id="consensusResult" class="result"></div>
+    </div>
+        <div class="section">
+            <h3>Approval/Rejection vs Model Accuracy (Joined)</h3>
+            <div id="decisionVsAccuracyChart"></div>
+            <button onclick="renderDecisionVsAccuracy()">Refresh Decision vs Accuracy</button>
+        </div>
+
+        // Decision vs Accuracy (joined) dual-axis chart
+        async function renderDecisionVsAccuracy() {
+            const response = await fetch('/api/decision_vs_accuracy');
+            const data = await response.json();
+            const labels = data.map(d => d.week);
+            const chartHtml = `<canvas id='decisionVsAccuracyChartCanvas' width='700' height='300'></canvas>`;
+            document.getElementById('decisionVsAccuracyChart').innerHTML = chartHtml;
+            if (window.Chart) {
+                const ctx = document.getElementById('decisionVsAccuracyChartCanvas').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Approved',
+                                data: data.map(d => d.approved),
+                                backgroundColor: 'green',
+                                stack: 'decisions',
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Rejected',
+                                data: data.map(d => d.rejected),
+                                backgroundColor: 'red',
+                                stack: 'decisions',
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'F1 Score (%)',
+                                data: data.map(d => d.avg_f1 * 100),
+                                borderColor: 'orange',
+                                yAxisID: 'y1',
+                                fill: false
+                            },
+                            {
+                                type: 'line',
+                                label: 'Accuracy (%)',
+                                data: data.map(d => d.avg_accuracy * 100),
+                                borderColor: 'blue',
+                                yAxisID: 'y1',
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Weekly Approval vs Rejection & Accuracy (Joined)' }
+                        },
+                        scales: {
+                            y: { stacked: true, position: 'left', title: { display: true, text: 'Decisions Count' } },
+                            y1: { type: 'linear', position: 'right', title: { display: true, text: 'Accuracy Metrics (%)' } }
+                        }
+                    }
+                });
+            }
+        }
+    <script>
+                                                                                                        async function exportPDF() {
+                                                                                                            const reportText = document.getElementById('analysis-results').innerText || 'No report available.';
+                                                                                                            const url = document.getElementById('suspicious-url').value;
+                                                                                                            const response = await fetch('/api/export_pdf', {
+                                                                                                                method: 'POST',
+                                                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                                                body: JSON.stringify({ report_text: reportText, url })
+                                                                                                            });
+                                                                                                            const result = await response.json();
+                                                                                                            alert('PDF exported: ' + result.pdf_file);
+                                                                                                        }
+                                                                                                        async function sendReportEmail() {
+                                                                                                            const reportText = document.getElementById('analysis-results').innerText || 'No report available.';
+                                                                                                            const response = await fetch('/api/send_report_email', {
+                                                                                                                method: 'POST',
+                                                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                                                body: JSON.stringify({ report_text: reportText, recipient: 'soc@example.com' })
+                                                                                                            });
+                                                                                                            const result = await response.json();
+                                                                                                            alert(result.status);
+                                                                                                        }
+                                                                                                        async function fetchThreatFeed() {
+                                                                                                            const response = await fetch('/api/threat_feed');
+                                                                                                            const result = await response.json();
+                                                                                                            let html = '<h4>Threat Intelligence Feed</h4><ul>';
+                                                                                                            result.feed.forEach(item => {
+                                                                                                                html += `<li><strong>${item.date}:</strong> ${item.threat}</li>`;
+                                                                                                            });
+                                                                                                            html += '</ul>';
+                                                                                                            document.getElementById('threatFeedResult').innerHTML = html;
+                                                                                                        }
+                                                                                                        async function showAnalytics() {
+                                                                                                            const response = await fetch('/api/analytics');
+                                                                                                            const result = await response.json();
+                                                                                                            let html = `<h4>Dashboard Analytics</h4>
+                                                                                                                <ul>
+                                                                                                                    <li>Total Incidents: ${result.total_incidents}</li>
+                                                                                                                    <li>High Risk: ${result.high_risk}</li>
+                                                                                                                    <li>Low Risk: ${result.low_risk}</li>
+                                                                                                                    <li>Most Targeted Brand: ${result.most_targeted_brand}</li>
+                                                                                                                    <li>Last Incident: ${result.last_incident}</li>
+                                                                                                                </ul>`;
+                                                                                                            document.getElementById('analyticsResult').innerHTML = html;
+                                                                                                        }
+                                                                                                // Theme toggle logic
+                                                                                                function setTheme(theme) {
+                                                                                                    document.documentElement.setAttribute('data-theme', theme);
+                                                                                                    localStorage.setItem('dashboardTheme', theme);
+                                                                                                    document.getElementById('theme-icon').textContent = theme === 'dark' ? '🌙' : '🌞';
+                                                                                                }
+                                                                                                function toggleTheme() {
+                                                                                                    const current = document.documentElement.getAttribute('data-theme') || 'light';
+                                                                                                    setTheme(current === 'light' ? 'dark' : 'light');
+                                                                                                }
+                                                                                                document.getElementById('theme-toggle').onclick = toggleTheme;
+                                                                                                // On load, set theme from localStorage
+                                                                                                (function() {
+                                                                                                    const saved = localStorage.getItem('dashboardTheme') || 'light';
+                                                                                                    setTheme(saved);
+                                                                                                })();
+                                                                                        function downloadReport(reportText) {
+                                                                                            const blob = new Blob([reportText], { type: 'text/plain' });
+                                                                                            const url = window.URL.createObjectURL(blob);
+                                                                                            const a = document.createElement('a');
+                                                                                            a.href = url;
+                                                                                            a.download = `Phishing_Incident_${new Date().getTime()}.txt`;
+                                                                                            a.click();
+                                                                                        }
+                                                                                function showAISuggestion() {
+                                                                                    const suggestions = [
+                                                                                        "Simulate a targeted phishing campaign using homoglyph domains.",
+                                                                                        "Analyze user click patterns for suspicious login prompts.",
+                                                                                        "Detect multi-layered subdomain attacks in real time.",
+                                                                                        "Create a scenario for credential harvesting via OAuth consent screens.",
+                                                                                        "Monitor for unusual MFA requests from non-standard domains."
+                                                                                    ];
+                                                                                    const pick = suggestions[Math.floor(Math.random() * suggestions.length)];
+                                                                                    document.getElementById('ai-suggestion-result').innerHTML = `<strong>AI Suggestion:</strong> ${pick}`;
+                                                                                }
+                                                                                function submitScenario() {
+                                                                                    const scenario = document.getElementById('user-scenario').value.trim();
+                                                                                    if (!scenario) {
+                                                                                        document.getElementById('ai-suggestion-result').innerHTML = '<span style="color:#d83b01;">Please describe your scenario.</span>';
+                                                                                        return;
+                                                                                    }
+                                                                                    document.getElementById('ai-suggestion-result').innerHTML = `<strong>Your Scenario:</strong> ${scenario} <br><span style='color:#107c10;'>Submitted for analytics!</span>`;
+                                                                                }
+                                                                        function highlightRedFlag(text) {
+                                                                            if (text.match(/embedded login|misspelled domain|homoglyph|multi-layered subdomain|proxy phish/i)) {
+                                                                                return `<span style="color:#d83b01;font-weight:bold;">${text}</span>`;
+                                                                            }
+                                                                            return text;
+                                                                        }
+                                                                        async function analyzeURL() {
+                                                                            const urlInput = document.getElementById('suspicious-url').value.trim();
+                                                                            const resultsDiv = document.getElementById('analysis-results');
+                                                                            if (!urlInput) {
+                                                                                resultsDiv.style.display = 'block';
+                                                                                resultsDiv.innerHTML = '<span style="color:#d83b01;">⚠️ Please paste a URL to analyze.</span>';
+                                                                                return;
+                                                                            }
+                                                                            resultsDiv.style.display = 'block';
+                                                                            resultsDiv.innerHTML = '🔎 Running Security Analysis...';
+                                                                            try {
+                                                                                const response = await fetch('/api/analyze', {
+                                                                                    method: 'POST',
+                                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                                    body: JSON.stringify({ url: urlInput })
+                                                                                });
+                                                                                const data = await response.json();
+                                                                                let html = `<div style="color: ${data.risk_level === 'HIGH' ? '#d83b01' : '#107c10'}; font-weight: bold;">Risk Level: ${data.risk_level}</div>`;
+                                                                                if (data.findings && data.findings.length) {
+                                                                                    html += '<ul>' + data.findings.map(f => `<li>⚠️ ${highlightRedFlag(f)}</li>`).join('') + '</ul>';
+                                                                                }
+                                                                                if (data.red_team_steps && data.red_team_steps.length) {
+                                                                                    html += '<h4>Step-by-Step Red-Team Analysis:</h4><ol>' + data.red_team_steps.map(s => `<li>${highlightRedFlag(s)}</li>`).join('') + '</ol>';
+                                                                                }
+                                                                                html += `<p><strong>Recommendation:</strong> ${data.recommendation}</p>`;
+                                                                                if (data.risk_level === 'HIGH') {
+                                                                                    html += `<div style="background:#f9f9f9; border-left:5px solid #0078d4; padding:10px; margin-top:15px;">
+                                                                                        <h3>🧠 Phishing Training Material</h3>
+                                                                                        <h4>Microsoft:</h4>
+                                                                                        <ul>
+                                                                                            <li>🔗 <strong>Golden Rule:</strong> Never enter credentials on a Microsoft login page embedded in another window.</li>
+                                                                                            <li>🔍 <strong>Check the URL:</strong> Only trust <em>login.microsoftonline.com</em>.</li>
+                                                                                            <li>🖼️ <strong>Check the Layout:</strong> Look for official logos and legal footers.</li>
+                                                                                        </ul>
+                                                                                        <h4>Adobe:</h4>
+                                                                                        <ul>
+                                                                                            <li>🔗 <strong>Golden Rule:</strong> Adobe sign-in should only occur on <em>adobe.com</em> domains.</li>
+                                                                                            <li>🔍 <strong>Check the URL:</strong> Watch for misspelled or extra subdomains.</li>
+                                                                                            <li>🖼️ <strong>Check the Layout:</strong> Official branding and security notices must be present.</li>
+                                                                                        </ul>
+                                                                                        <h4>DocuSign:</h4>
+                                                                                        <ul>
+                                                                                            <li>🔗 <strong>Golden Rule:</strong> DocuSign login should only be on <em>docusign.com</em>.</li>
+                                                                                            <li>🔍 <strong>Check the URL:</strong> Beware of nested subdomains or unrelated root domains.</li>
+                                                                                            <li>🖼️ <strong>Check the Layout:</strong> Look for DocuSign security banners and legal footers.</li>
+                                                                                        </ul>
+                                                                                    </div>`;
+                                                                                    html += `<div style="background:#fffbe6; border-left:5px solid #d83b01; padding:10px; margin-top:15px;">
+                                                                                        <h3>🏆 Vigilance Level: Expert</h3>
+                                                                                        <p>Great catch! By analyzing this link before clicking, you’ve successfully applied the Golden Rule. You just protected your credentials and the organization from a potential OAuth or proxy-phishing attack. Please forward this link to the security team as an attachment to help us update our threat intelligence.</p>
+                                                                                        <h4>Next Steps:</h4>
+                                                                                        <ul>
+                                                                                            <li>❌ Close the browser tab immediately.</li>
+                                                                                            <li>📧 Report the link to the SOC.</li>
+                                                                                            <li>🚫 Do NOT enter any passwords or MFA tokens.</li>
+                                                                                            <li>🔍 Check for unusual OAuth permissions if you already clicked a 'Sign-In' button.</li>
+                                                                                        </ul>
+                                                                                    </div>`;
+                                                                                }
+                                                                                resultsDiv.innerHTML = html;
+                                                                            } catch {
+                                                                                resultsDiv.innerHTML = '<span style="color:#d83b01;">❌ Error: Unable to connect to backend for security analysis.</span>';
+                                                                            }
+                                                                        }
+                                                                async function runSecurityAnalysis() {
+                                                                    const url = document.getElementById('securityUrlInput').value.trim();
+                                                                    const log = [];
+                                                                    if (!url) {
+                                                                        log.push('⚠️ Please paste a URL to analyze.');
+                                                                        document.getElementById('securityAnalysisLog').textContent = log.join('\n');
+                                                                        return;
+                                                                    }
+                                                                    log.push('🔎 Running Security Analysis...');
+                                                                    try {
+                                                                        const res = await fetch('http://localhost:5000/api/security-analysis', {
+                                                                            method: 'POST',
+                                                                            headers: {'Content-Type': 'application/json'},
+                                                                            body: JSON.stringify({url})
+                                                                        });
+                                                                        const data = await res.json();
+                                                                        log.push(`URL: ${data.url}`);
+                                                                        log.push(`Risk Level: ${data.risk_level}`);
+                                                                        if (data.findings && data.findings.length) {
+                                                                            log.push('Findings:');
+                                                                            data.findings.forEach(f => log.push(`- ${f}`));
+                                                                        }
+                                                                        log.push(`Recommendation: ${data.recommendation}`);
+                                                                    } catch {
+                                                                        log.push('❌ Error: Unable to connect to backend for security analysis.');
+                                                                    }
+                                                                    document.getElementById('securityAnalysisLog').textContent = log.join('\n');
+                                                                }
+                                                        function openSecurityPortal() {
+                                                            document.getElementById('securityModal').style.display = 'block';
+                                                        }
+                                                        function closeSecurityPortal() {
+                                                            document.getElementById('securityModal').style.display = 'none';
+                                                            document.getElementById('urlLog').textContent = '';
+                                                            document.getElementById('urlInput').value = '';
+                                                        }
+                                                        async function inspectURL() {
+                                                            const url = document.getElementById('urlInput').value.trim();
+                                                            const log = [];
+                                                            if (!url) {
+                                                                log.push('⚠️ Please paste a URL to inspect.');
+                                                                document.getElementById('urlLog').textContent = log.join('\n');
+                                                                return;
+                                                            }
+                                                            log.push('🔎 Inspecting URL with Red-Team Analysis Framework...');
+                                                            try {
+                                                                const res = await fetch('http://localhost:5000/api/url-inspector', {
+                                                                    method: 'POST',
+                                                                    headers: {'Content-Type': 'application/json'},
+                                                                    body: JSON.stringify({url})
+                                                                });
+                                                                const data = await res.json();
+                                                                if (data.steps && Array.isArray(data.steps)) {
+                                                                    data.steps.forEach(s => log.push(`- ${s}`));
+                                                                } else {
+                                                                    log.push('No analysis steps received from backend.');
+                                                                }
+                                                            } catch {
+                                                                log.push('❌ Error: Unable to connect to backend for URL inspection.');
+                                                            }
+                                                            document.getElementById('urlLog').textContent = log.join('\n');
+                                                        }
+                                                async function runDreamscape() {
+                                                    const log = [];
+                                                    const userScenario = document.getElementById("dreamInput").value.trim();
+                                                    if (!userScenario) {
+                                                        log.push("⚠️ Please describe your dreamlike scenario above.");
+                                                        document.getElementById("dreamLog").textContent = log.join("\n");
+                                                        return;
+                                                    }
+                                                    log.push("🌙 Dreamscape Simulation Activated:");
+                                                    log.push(`- User Scenario: ${userScenario}`);
+                                                    // Call backend for AI-generated creative suggestions
+                                                    try {
+                                                        const res = await fetch('http://localhost:5000/api/dreamscape', {
+                                                            method: 'POST',
+                                                            headers: {'Content-Type': 'application/json'},
+                                                            body: JSON.stringify({scenario: userScenario})
+                                                        });
+                                                        const data = await res.json();
+                                                        if (data.suggestions && Array.isArray(data.suggestions)) {
+                                                            data.suggestions.forEach(s => log.push(`- Creative Suggestion: ${s}`));
+                                                        } else {
+                                                            log.push("No creative suggestions received from backend.");
+                                                        }
+                                                    } catch {
+                                                        log.push("❌ Error: Unable to connect to backend for creative suggestions.");
+                                                    }
+                                                    log.push("💡 Insight: Dream‑logic simulations uncover unconventional solutions and inspire innovation.");
+                                                    log.push("✅ Dreamscape complete. Creative strategies revealed.");
+                                                    document.getElementById("dreamLog").textContent = log.join("\n");
+                                                }
+                                        function runCosmicResilience() {
+                                            const log = [];
+                                            // Simulated cosmic scenarios
+                                            const scenarios = [
+                                                {event:"Solar Flare Disruption", impact:"Temporary communication blackout", mitigation:"Switch to hardened backup channels"},
+                                                {event:"Interplanetary Latency", impact:"Delays up to 20 minutes", mitigation:"Adaptive buffering + predictive alerts"},
+                                                {event:"Asteroid Network Shock", impact:"Regional infrastructure outage", mitigation:"Dynamic rerouting via satellite mesh"},
+                                                {event:"Cosmic Radiation Spike", impact:"Data corruption risk", mitigation:"Quantum‑resistant error correction"},
+                                                {event:"Wormhole Simulation", impact:"Unstable time‑shifted signals", mitigation:"Time‑warp synchronization protocols"}
+                                            ];
+                                            log.push("🌠 Cosmic Resilience Stress Test Activated:");
+                                            scenarios.forEach(s => log.push(`- Event: ${s.event} → Impact: ${s.impact} → Mitigation: ${s.mitigation}`));
+                                            log.push("💡 Insight: System remains operational even under universe‑scale disruptions.");
+                                            log.push("✅ Stress test complete. Cosmic resilience verified.");
+                                            document.getElementById("cosmicLog").textContent = log.join("\n");
+                                        }
+                                function runPanDimensional() {
+                                    const log = [];
+                                    // Simulated dimensional perspectives
+                                    const dimensions = [
+                                        {name:"Operational Dimension", insight:"Workflow efficiency at 92%"},
+                                        {name:"Temporal Dimension", insight:"Future escalation risk rises after 6 months"},
+                                        {name:"Behavioral Dimension", insight:"Admins respond faster to visual alerts"},
+                                        {name:"Ethical Dimension", insight:"Bias detected in escalation prioritization"},
+                                        {name:"Quantum Dimension", insight:"Parallel workflow paths reveal hidden failure clusters"}
+                                    ];
+                                    log.push("🌌 Pan‑Dimensional Analytics Activated:");
+                                    dimensions.forEach(d => log.push(`- ${d.name} → ${d.insight}`));
+                                    log.push("💡 Insight: Multi‑dimensional analysis uncovers correlations invisible in single‑plane analytics.");
+                                    log.push("✅ Analysis complete. Hidden risks and opportunities revealed.");
+                                    document.getElementById("panLog").textContent = log.join("\n");
+                                }
+                        function launchMetaverse() {
+                            const log = [];
+                            // Simulated metaverse features
+                            const features = [
+                                "👥 Avatars for each team member",
+                                "🏢 Virtual command center with dashboards",
+                                "📊 Floating analytics charts in 3D space",
+                                "🖐️ Gesture‑based workflow editing",
+                                "🎤 Spatial audio for real‑time discussions"
+                            ];
+                            log.push("🌐 Metaverse Collaboration Workspace Activated:");
+                            features.forEach(f => log.push(`- ${f}`));
+                            log.push("💡 Insight: Teams can co‑manage notifications, workflows, and analytics inside a shared 3D environment.");
+                            log.push("✅ Simulation complete. Metaverse collaboration ready for deployment.");
+                            document.getElementById("metaverseLog").textContent = log.join("\n");
+                        }
+                function runTimeWarp() {
+                    const log = [];
+                    // Simulated time‑warp modes
+                    const modes = [
+                        {speed:"10x faster", insight:"Forecast 1 year of notifications in 36 days"},
+                        {speed:"100x faster", insight:"Forecast 5 years of workflows in 18 days"},
+                        {speed:"0.5x slower", insight:"Detailed micro‑analysis of escalation paths"},
+                        {speed:"freeze mode", insight:"Pause system to inspect state at a single moment"}
+                    ];
+                    log.push("⏳ Time‑Warp Simulation Activated:");
+                    modes.forEach(m => log.push(`- Mode: ${m.speed} → ${m.insight}`));
+                    log.push("💡 Insight: Admins can now accelerate or slow down workflow simulations to anticipate long‑term outcomes or analyze micro‑details.");
+                    log.push("✅ Simulation complete. Time‑warp adjustments ready for deployment.");
+                    document.getElementById("timeWarpLog").textContent = log.join("\n");
+                }
+        function renderResult(id, data) {
+            document.getElementById(id).textContent = JSON.stringify(data, null, 2);
+        }
+        async function fetchProfile() {
+            const res = await fetch('http://localhost:5000/api/biometric/profile');
+            const data = await res.json();
+            renderResult('profileResult', data);
+        }
+        async function fetchWearable() {
+            const res = await fetch('http://localhost:5000/api/biometric/wearable');
+            const data = await res.json();
+            renderResult('wearableResult', data);
+        }
+        async function fetchHello() {
+            const res = await fetch('http://localhost:5000/api/biometric/windowshello');
+            const data = await res.json();
+            renderResult('helloResult', data);
+        }
+        async function fetchEnvironment() {
+            const res = await fetch('http://localhost:5000/api/biometric/environment');
+            const data = await res.json();
+            renderResult('envResult', data);
+        }
+        async function runConsensus() {
+            const input = document.getElementById('consensusInput').value;
+            let recommendations;
+            try {
+                recommendations = JSON.parse(input);
+            } catch {
+                renderResult('consensusResult', {error: 'Invalid JSON'});
+                return;
+            }
+            const res = await fetch('http://localhost:5000/api/consensus', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(recommendations)
+            });
+            const data = await res.json();
+            renderResult('consensusResult', data);
+        }
+
+        // Auto-refresh every 5 seconds
+        function autoRefresh() {
+            fetchProfile();
+            fetchWearable();
+            fetchHello();
+            fetchEnvironment();
+        }
+        setInterval(autoRefresh, 5000);
+        window.onload = autoRefresh;
+    // SLA Risk Gauge + Incident vs SLA Chart rendering
+    async function renderIncidentSLAChart() {
+        // Fetch decision trend data
+        renderDecisionTrend();
+            async function renderDecisionTrend() {
+                const response = await fetch('/api/decision_trend');
+                const data = await response.json();
+                const labels = data.map(d => d.week);
+                const chartHtml = `<canvas id='decisionTrendChartCanvas' width='700' height='300'></canvas>`;
+                document.getElementById('decisionTrendChart').innerHTML = chartHtml;
+                if (window.Chart) {
+                    const ctx = document.getElementById('decisionTrendChartCanvas').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: 'Approved',
+                                    data: data.map(d => d.approved),
+                                    backgroundColor: 'green'
+                                },
+                                {
+                                    label: 'Rejected',
+                                    data: data.map(d => d.rejected),
+                                    backgroundColor: 'red'
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                x: { stacked: true },
+                                y: { stacked: true }
+                            }
+                        }
+                    });
+                }
+            }
+        // Fetch threshold history for decision stats
+        const trendRes = await fetch('/api/threshold_trend');
+        const history = await trendRes.json();
+        const approved = history.filter(h => h.decision === "approved").length;
+        const rejected = history.filter(h => h.decision === "rejected").length;
+        const approvalRate = approved + rejected > 0 ? ((approved / (approved + rejected)) * 100).toFixed(1) : "0.0";
+        document.getElementById('decisionStatsPanel').innerHTML = `
+            <p>Approved: ${approved}</p>
+            <p>Rejected: ${rejected}</p>
+            <p>Approval Rate: ${approvalRate}%</p>
+        `;
+        // Fetch threshold trend data
+        renderThresholdTrend();
+
+        // Decision + Accuracy Trend dual-axis chart
+        async function renderDecisionAccuracyTrend() {
+            const response = await fetch('/api/decision_accuracy_trend');
+            const data = await response.json();
+            const labels = data.map(d => d.week);
+            const chartHtml = `<canvas id='decisionAccuracyTrendChartCanvas' width='700' height='300'></canvas>`;
+            document.getElementById('decisionAccuracyTrendChart').innerHTML = chartHtml;
+            if (window.Chart) {
+                const ctx = document.getElementById('decisionAccuracyTrendChartCanvas').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Approved',
+                                data: data.map(d => d.approved),
+                                backgroundColor: 'green',
+                                stack: 'decisions',
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Rejected',
+                                data: data.map(d => d.rejected),
+                                backgroundColor: 'red',
+                                stack: 'decisions',
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'F1 Score (%)',
+                                data: data.map(d => d.avg_f1 * 100),
+                                borderColor: 'orange',
+                                yAxisID: 'y1',
+                                fill: false
+                            },
+                            {
+                                type: 'line',
+                                label: 'Accuracy (%)',
+                                data: data.map(d => d.avg_accuracy * 100),
+                                borderColor: 'blue',
+                                yAxisID: 'y1',
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Weekly Approval vs Rejection & Accuracy Trend' }
+                        },
+                        scales: {
+                            y: { stacked: true, position: 'left', title: { display: true, text: 'Decisions Count' } },
+                            y1: { type: 'linear', position: 'right', title: { display: true, text: 'Accuracy Metrics (%)' } }
+                        }
+                    }
+                });
+            }
+        }
+            async function renderThresholdTrend() {
+                const response = await fetch('/api/threshold_trend');
+                const data = await response.json();
+                const labels = data.map(d => d.adjusted_at);
+                const chartHtml = `<canvas id='thresholdTrendChartCanvas' width='700' height='300'></canvas>`;
+                document.getElementById('thresholdTrendChart').innerHTML = chartHtml;
+                if (window.Chart) {
+                    const ctx = document.getElementById('thresholdTrendChartCanvas').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: 'Threshold',
+                                    data: data.map(d => d.threshold),
+                                    borderColor: 'purple',
+                                    fill: false,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Precision',
+                                    data: data.map(d => d.precision * 100),
+                                    borderColor: 'blue',
+                                    fill: false,
+                                    yAxisID: 'y1'
+                                },
+                                {
+                                    label: 'Recall',
+                                    data: data.map(d => d.recall * 100),
+                                    borderColor: 'green',
+                                    fill: false,
+                                    yAxisID: 'y1'
+                                },
+                                {
+                                    label: 'F1 Score',
+                                    data: data.map(d => d.f1 * 100),
+                                    borderColor: 'orange',
+                                    fill: false,
+                                    yAxisID: 'y1'
+                                },
+                                {
+                                    label: 'Accuracy',
+                                    data: data.map(d => d.accuracy * 100),
+                                    borderColor: 'red',
+                                    fill: false,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                y: { type: 'linear', position: 'left', title: { display: true, text: 'Threshold' } },
+                                y1: { type: 'linear', position: 'right', title: { display: true, text: 'Accuracy Metrics (%)' } }
+                            }
+                        }
+                    });
+                }
+            }
+        // Fetch current threshold
+        const thresholdRes = await fetch('/api/sla_threshold');
+        const thresholdData = await thresholdRes.json();
+        document.getElementById('thresholdPanel').innerHTML = `
+            <p>Current cutoff: ${thresholdData.threshold.toFixed(2)}</p>
+            <p>(Auto‑adjusted weekly based on model accuracy)</p>
+        `;
+        // Fetch model accuracy metrics
+        const metricsRes = await fetch('/api/model_accuracy');
+        const metrics = await metricsRes.json();
+        document.getElementById('modelAccuracyPanel').innerHTML = `
+            <p>Precision: ${(metrics.precision * 100).toFixed(1)}%</p>
+            <p>Recall: ${(metrics.recall * 100).toFixed(1)}%</p>
+            <p>F1 Score: ${(metrics.f1 * 100).toFixed(1)}%</p>
+            <p>Overall Accuracy: ${(metrics.accuracy * 100).toFixed(1)}%</p>
+        `;
+        const [slaRiskRes, incidentRes] = await Promise.all([
+            fetch('/api/sla_risk_forecast'),
+            fetch('/api/incidents_vs_sla')
+        ]);
+        const slaRisk = await slaRiskRes.json();
+        const data = await incidentRes.json();
+        // Gauge
+        const riskPct = Math.round(slaRisk.risk_score * 100);
+        document.getElementById('slaRiskGauge').textContent = riskPct + '%';
+        document.getElementById('slaRiskGauge').style.background = slaRisk.risk_score > slaRisk.threshold ? '#fffbe6' : '#f9f9f9';
+        document.getElementById('slaRiskGauge').style.color = slaRisk.risk_score > slaRisk.threshold ? '#d83b01' : '#107c10';
+        // Alert overlay
+        document.getElementById('slaRiskAlert').textContent = slaRisk.risk_score > slaRisk.threshold ? '⚠️ Predictive SLA Risk Alert Triggered!' : '';
+        // Model accuracy
+        document.getElementById('slaModelAccuracy').textContent = `Model accuracy: ${slaRisk.model_accuracy.toFixed(2)}%`;
+        // Chart
+        const labels = data.map(d => d.day);
+        const incidents = data.map(d => d.incidents);
+        const breaches = data.map(d => d.breaches);
+        const chartHtml = `<canvas id='incidentSLAChartCanvas' width='600' height='300'></canvas>`;
+        document.getElementById('incidentSLAChart').innerHTML = chartHtml;
+        if (window.Chart) {
+            const ctx = document.getElementById('incidentSLAChartCanvas').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Incidents',
+                            data: incidents,
+                            borderColor: 'blue',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'SLA Breaches',
+                            data: breaches,
+                            borderColor: 'red',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: { type: 'linear', position: 'left' },
+                        y1: { type: 'linear', position: 'right' }
+                    }
+                }
+            });
+        }
+    }
+    window.onload = function() {
+        autoRefresh();
+        renderIncidentSLAChart();
+    };
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+version: 2.1
+
+jobs:
+  test_and_notify:
+    docker:
+      - image: cimg/python:3.9
+    environment:
+      SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/your/webhook/url"
+    steps:
+      - checkout
+      - run: pip install -r requirements.txt
+      - run: pytest --cov=. --cov-report=html
+      - run: |
+          if [ $? -eq 0 ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{"text":"Test results: All passed! Coverage report generated."}' \
+              "$SLACK_WEBHOOK_URL"
+          else
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{"text":"Test results: FAILED!"}' \
+              "$SLACK_WEBHOOK_URL"
+          fi
+      - store_artifacts:
+          path: htmlcov
+          destination: coverage-report
+  notify_slack:
+    docker:
+      - image: cimg/python:3.9
+    environment:
+      SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/your/webhook/url"
+    steps:
+      - run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"Build status: '$CIRCLE_BUILD_STATUS' for project: '$CIRCLE_PROJECT_REPONAME'"}' \
+            "$SLACK_WEBHOOK_URL"
+  build:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - run: pip install -r requirements.txt
+      - run: pip install uvicorn fastapi pydantic slowapi pyjwt
+      - run: pytest tests/
+  test_and_report:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - run: pip install -r requirements.txt
+      - run: pip install coverage pytest
+      - run: coverage run -m pytest tests/
+      - run: coverage report
+      - run: coverage xml
+      - store_artifacts:
+          path: coverage.xml
+          destination: coverage-report
+      - store_test_results:
+          path: tests/
+      - run: |
+          if [ "$CIRCLE_BUILD_STATUS" != "success" ]; then
+            echo "Test failures detected. Sending notification..."
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"Test failures in $CIRCLE_PROJECT_REPONAME. See CircleCI for details."}' "$SLACK_WEBHOOK_URL"
+          fi
+  notify_email_ses:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - run: pip install boto3
+      - run: |
+          echo "import os\nimport boto3\nses = boto3.client('ses', region_name=os.getenv('SES_REGION'))\nif os.getenv('CIRCLE_JOB') == 'notify_email_ses' and os.getenv('CIRCLE_BUILD_STATUS') != 'success':\n    ses.send_email(\n        Source=os.getenv('NOTIFY_EMAIL'),\n        Destination={'ToAddresses': [os.getenv('NOTIFY_EMAIL')]},\n        Message={\n            'Subject': {'Data': f'CI/CD Pipeline Failed for {os.getenv('CIRCLE_PROJECT_REPONAME')}'},\n            'Body': {'Text': {'Data': f'The CI/CD pipeline for {os.getenv('CIRCLE_PROJECT_REPONAME')} failed. See details: {os.getenv('CIRCLE_BUILD_URL')}'}}\n        }\n    )" > notify_email_ses.py
+          cat <<EOF > notify_email_ses.py
+    import boto3, os
+    ses = boto3.client('ses', region_name=os.getenv('SES_REGION'))
+    if os.getenv('CIRCLE_JOB') == 'notify_email_ses' and os.getenv('CIRCLE_BUILD_STATUS') != 'success':
+      ses.send_email(
+        Source=os.getenv('NOTIFY_EMAIL'),
+        Destination={'ToAddresses': [os.getenv('NOTIFY_EMAIL')]},
+        Message={
+          'Subject': {'Data': f'CI/CD Pipeline Failed for {os.getenv("CIRCLE_PROJECT_REPONAME")}'},
+          'Body': {'Text': {'Data': f'The CI/CD pipeline for {os.getenv("CIRCLE_PROJECT_REPONAME")} failed. See details: {os.getenv("CIRCLE_BUILD_URL")}'}}
+        }
+      )
+    EOF
+          python notify_email_ses.py
+  notify_multichannel:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - run: |
+          STATUS_ICON="✅"
+          if [ "$CIRCLE_BUILD_STATUS" != "success" ]; then STATUS_ICON="❌"; fi
+          MSG_MD="### 🚨 Build Notification\n\nStatus: $STATUS_ICON Build $CIRCLE_BUILD_STATUS\nProject: $CIRCLE_PROJECT_REPONAME\nTimestamp: $(date -u)\n\nDetails:\n- Triggered by: @$CIRCLE_USERNAME\n- Environment: $CIRCLE_BRANCH\n- Commit: $CIRCLE_SHA1\n\nLinks:\n- [Build Logs]($CIRCLE_BUILD_URL)\n- [Dashboard](https://example.com/dashboard/$CIRCLE_PROJECT_REPONAME)\n- [Ticket #456](https://example.com/tickets/456)\n\nAttachments:\n- 📎 [Build Log (.txt)](https://example.com/artifacts/build-log.txt)\n- 📎 [Summary Report (.pdf)](https://example.com/artifacts/report.pdf)\n\nMentions:\n- @dev-team\n- @qa-team\n\n---"
+          # Slack
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"'$MSG_MD'"}' "$SLACK_WEBHOOK_URL"
+          # Discord
+          curl -H 'Content-Type: application/json' -d '{"content": "'$MSG_MD'"}' "$DISCORD_WEBHOOK_URL"
+          # Teams
+          curl -H 'Content-Type: application/json' -d '{"text":"'$MSG_MD'"}' "$TEAMS_WEBHOOK_URL"
+          # Telegram
+          curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" -d chat_id="$TELEGRAM_CHAT_ID" -d text="$MSG_MD"
+          # WhatsApp (Twilio)
+          curl -X POST "https://api.twilio.com/2010-04-01/Accounts/$TWILIO_ACCOUNT_SID/Messages.json" --data-urlencode "To=$WHATSAPP_TO" --data-urlencode "From=$WHATSAPP_FROM" --data-urlencode "Body=$MSG_MD" -u $TWILIO_ACCOUNT_SID:$TWILIO_AUTH_TOKEN
+          # Mattermost
+          curl -H 'Content-Type: application/json' -d '{"text":"'$MSG_MD'"}' "$MATTERMOST_WEBHOOK_URL"
+          # Jira
+          curl -u $JIRA_USER:$JIRA_API_TOKEN -X POST --data '{"fields":{"project":{"key":"$JIRA_PROJECT_KEY"},"summary":"Build $CIRCLE_BUILD_STATUS for $CIRCLE_PROJECT_REPONAME","description":"'$MSG_MD'","issuetype":{"name":"Bug"}}}' -H "Content-Type: application/json" "$JIRA_API_URL/rest/api/2/issue"
+          # ServiceNow
+          curl -u $SERVICENOW_USER:$SERVICENOW_API_TOKEN -X POST --data '{"short_description":"Build $CIRCLE_BUILD_STATUS for $CIRCLE_PROJECT_REPONAME","description":"'$MSG_MD'"}' -H "Content-Type: application/json" "$SERVICENOW_API_URL/api/now/table/incident"
+          # Zendesk
+          curl -u $ZENDESK_USER:$ZENDESK_API_TOKEN -X POST --data '{"ticket":{"subject":"Build $CIRCLE_BUILD_STATUS for $CIRCLE_PROJECT_REPONAME","comment":{"body":"'$MSG_MD'"}}}' -H "Content-Type: application/json" "$ZENDESK_API_URL/api/v2/tickets.json"
+          # Example integration: Datadog event
+          curl -X POST -H "Content-type: application/json" -H "DD-API-KEY: $DATADOG_API_KEY" -d '{"title": "CircleCI Pipeline $CIRCLE_BUILD_STATUS", "text": "$STATUS_MSG", "tags": ["project:$CIRCLE_PROJECT_REPONAME", "branch:$CIRCLE_BRANCH"]}' "https://api.datadoghq.com/api/v1/events"
+
+workflows:
+  # version: 2 (removed for CircleCI 2.1 compliance)
+  build_and_notify:
+    jobs:
+      - build
+      - test_and_notify:
+          requires:
+            - build
+              cat <<EOF > notify_email_ses.py
+  import boto3, os
+  ses = boto3.client('ses', region_name=os.getenv('SES_REGION'))
+  if os.getenv('CIRCLE_JOB') == 'notify_email_ses' and os.getenv('CIRCLE_BUILD_STATUS') != 'success':
+      ses.send_email(
+          Source=os.getenv('NOTIFY_EMAIL'),
+          Destination={'ToAddresses': [os.getenv('NOTIFY_EMAIL')]},
+          Message={
+              'Subject': {'Data': f'CI/CD Pipeline Failed for {os.getenv("CIRCLE_PROJECT_REPONAME")}'},
+              'Body': {'Text': {'Data': f'The CI/CD pipeline for {os.getenv("CIRCLE_PROJECT_REPONAME")} failed. See details: {os.getenv("CIRCLE_BUILD_URL")}'}}
+          }
+      )
+  EOF
+              python notify_email_ses.py

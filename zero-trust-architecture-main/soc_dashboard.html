@@ -1,0 +1,2399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SOC Artifact Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; color: #222; }
+        header { background: #34495e; color: #fff; padding: 1em 2em; display: flex; align-items: center; justify-content: space-between; }
+        .dashboard-title { font-size: 1.5em; }
+        .auth { margin-left: auto; }
+        .container { max-width: 1200px; margin: 2em auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 2em; }
+        .controls { display: flex; gap: 1em; margin-bottom: 1em; }
+        .controls input, .controls select { padding: 0.5em; border-radius: 4px; border: 1px solid #ccc; }
+        .controls label { font-weight: bold; }
+        .dark-mode { background: #222; color: #eee; }
+        .dark-mode header { background: #222; color: #fff; }
+        .dark-mode .container { background: #333; color: #eee; }
+        .bar-container { background: #f0f0f0; width: 300px; display: inline-block; margin-left: 10px; }
+        .bar { height: 20px; text-align: right; padding-right: 5px; color: white; font-size: 12px; border-radius: 4px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,0.5); }
+        .modal-content { background: #fff; margin: 10% auto; padding: 2em; border-radius: 8px; width: 400px; }
+        .close { float: right; font-size: 1.5em; cursor: pointer; }
+        .summary-section { margin-bottom: 2em; }
+        .collapsible { cursor: pointer; padding: 0.5em; background: #eee; border: none; outline: none; font-size: 1em; border-radius: 4px; margin-bottom: 0.5em; }
+        .active, .collapsible:hover { background: #ccc; }
+        .content { display: none; padding: 0.5em 0; }
+        .analytics { margin-top: 2em; }
+        .analytics h3 { margin-top: 0; }
+        .action-btn { background: #f44336; color: #fff; border: none; padding: 0.5em 1em; border-radius: 4px; cursor: pointer; }
+        .mfa-tracker-box { background: #111; border: 1px solid #333; padding: 20px; text-align: center; }
+        .count-display span { font-size: 3rem; color: #ff4d4d; font-weight: bold; }
+    </style>
+</head>
+<body>
+                                                                                                                                                        <h4>Collective Intelligence Module</h4>
+                                                                                                                                                        <textarea id="chatInput" placeholder='Paste JSON recommendations here (e.g., [{"source":"Admin","recommendation":"Escalate","weight":2},...])' rows="4" cols="60"></textarea><br>
+                                                                                                                                                        <button onclick="runCollectiveIntelligence()">Run Consensus Engine</button>
+                                                                                                                                                        <pre id="collectiveLog"></pre>
+                                                                                                                                                    <h4>Bio‑Adaptive Interface Module</h4>
+                                                                                                                                                    <input type="file" id="bioFile" accept=".json" />
+                                                                                                                                                    <button onclick="runBioAdaptive()">Run Bio‑Adaptive Check (File)</button>
+                                                                                                                                                    <button onclick="fetchBioFromAPI()">Fetch Biometric Data (Webcam/Windows Hello)</button>
+                                                                                                                                                    <pre id="bioLog"></pre>
+                                                                                                                                                <h4>Sentiment‑Aware Feedback Module</h4>
+                                                                                                                                                <input type="text" id="feedbackInput" placeholder="Enter feedback..." style="width:80%; padding:5px;">
+                                                                                                                                                <button onclick="analyzeFeedback()">Analyze Sentiment</button>
+                                                                                                                                                <pre id="feedbackLog"></pre>
+                                                                                                                                            <h4>Holographic Command Center Module</h4>
+                                                                                                                                            <button onclick="launchHolographicCenter()">Launch Holographic Interface</button>
+                                                                                                                                            <pre id="holoLog"></pre>
+                                                                                                                                        <h4>Neural Adaptive Optimization Module</h4>
+                                                                                                                                        <button onclick="runAdaptiveOptimization()">Run Adaptive Learning</button>
+                                                                                                                                        <pre id="adaptiveLog"></pre>
+                                                                                                                                    <h4>Digital Twin + RPA Fusion Module</h4>
+                                                                                                                                    <button onclick="runFusion()">Run Fusion Simulation</button>
+                                                                                                                                    <pre id="fusionLog"></pre>
+                                                                                                                                <h4>Robotic Process Automation (RPA) Module</h4>
+                                                                                                                                <button onclick="runRPA()">Run Automated Admin Tasks</button>
+                                                                                                                                <pre id="rpaLog"></pre>
+                                                                                                                            <h4>Digital Ethics & Governance Module</h4>
+                                                                                                                            <button onclick="runEthicsCheck()">Run Ethics & Compliance Audit</button>
+                                                                                                                            <pre id="ethicsLog"></pre>
+                                                                                                                        <h4>Augmented Reality Visualization Module</h4>
+                                                                                                                        <button onclick="runARVisualization()">Launch AR Dashboard</button>
+                                                                                                                        <pre id="arLog"></pre>
+                                                                                                                    <h4>Virtual Assistant Module</h4>
+                                                                                                                    <input type="text" id="assistantInput" placeholder="Ask me anything..." style="width:80%; padding:5px;">
+                                                                                                                    <button onclick="runAssistant()">Send</button>
+                                                                                                                    <pre id="assistantLog"></pre>
+                                                                                                                <h4>Real‑Time Collaboration Module</h4>
+                                                                                                                <button onclick="startCollaboration()">Start Collaboration Session</button>
+                                                                                                                <pre id="collabLog"></pre>
+                                                                                                            <h4>Cross‑Platform Integration Hub Module</h4>
+                                                                                                            <button onclick="runIntegrationTest()">Test Integrations</button>
+                                                                                                            <pre id="integrationLog"></pre>
+                                                                                                        <h4>Self‑Service Portal Module</h4>
+                                                                                                        <div style="border:1px solid #ccc; padding:15px; max-width:500px;">
+                                                                                                            <h4>User Preferences</h4>
+                                                                                                            <label>Notification Channels:</label><br>
+                                                                                                            <input type="checkbox" id="email" checked>Email<br>
+                                                                                                            <input type="checkbox" id="sms">SMS<br>
+                                                                                                            <input type="checkbox" id="slack" checked>Slack<br>
+                                                                                                            <input type="checkbox" id="teams">Teams<br><br>
+                                                                                                            <label>Escalation Rules:</label><br>
+                                                                                                            <select id="escalationRule">
+                                                                                                                <option value="none">No Escalation</option>
+                                                                                                                <option value="admin">Escalate to Admin</option>
+                                                                                                                <option value="teamLead">Escalate to Team Lead</option>
+                                                                                                                <option value="serviceDesk">Escalate to Service Desk</option>
+                                                                                                            </select><br><br>
+                                                                                                            <label>Subscription Topics:</label><br>
+                                                                                                            <input type="checkbox" id="deployments" checked>Deployments<br>
+                                                                                                            <input type="checkbox" id="incidents">Incidents<br>
+                                                                                                            <input type="checkbox" id="maintenance">Maintenance<br><br>
+                                                                                                            <button onclick="savePreferences()">Save Preferences</button>
+                                                                                                            <div id="portalLog" style="margin-top:10px; background:#f9f9f9; padding:10px; min-height:80px;">
+                                                                                                                Awaiting user input...
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                <h4>Zero‑Trust Access Module</h4>
+                                                                                                <button onclick="runZeroTrustCheck()">Run Zero‑Trust Check</button>
+                                                                                                <pre id="zeroTrustLog"></pre>
+                                                                                            <h4>Quantum‑Resistant Cryptography Module</h4>
+                                                                                            <button onclick="runQuantumCrypto()">Run Quantum Security Check</button>
+                                                                                            <pre id="quantumLog"></pre>
+                                                                                        <h4>Blockchain Audit Trail Module</h4>
+                                                                                        <button onclick="recordEvent()">Record Notification Event</button>
+                                                                                        <pre id="blockchainLog"></pre>
+                                                                                    <h4>Digital Twin Simulation Module</h4>
+                                                                                    <button onclick="runSimulation()">Run Simulation</button>
+                                                                                    <pre id="simulationLog"></pre>
+                                                                                <h4>Predictive Maintenance Module</h4>
+                                                                                <button onclick="runPredictiveMaintenance()">Run Predictive Forecast</button>
+                                                                                <pre id="maintenanceLog"></pre>
+                                                                            <h4>AI‑Powered Anomaly Detection Module</h4>
+                                                                            <button onclick="runAnomalyDetection()">Run Anomaly Detection</button>
+                                                                            <pre id="anomalyLog"></pre>
+                                                                        <h4>Data Lake & Big Data Analytics Module</h4>
+                                                                        <button onclick="runBigDataQuery()">Run Analytics Query</button>
+                                                                        <pre id="dataLakeLog"></pre>
+                                                                    <h4>Workflow Automation Module</h4>
+                                                                    <div style="border:1px solid #ccc; padding:15px; max-width:500px;">
+                                                                        <h4>Workflow Designer</h4>
+                                                                        <label>Add Step:</label>
+                                                                        <select id="workflowStep" onchange="addStep()">
+                                                                            <option value="">-- Select --</option>
+                                                                            <option value="triggerFailure">⚠️ Trigger: Failure Detected</option>
+                                                                            <option value="retry">🔄 Action: Retry Notification</option>
+                                                                            <option value="escalate">🚨 Action: Escalate to Admin</option>
+                                                                            <option value="notifySlack">💬 Action: Notify Slack Channel</option>
+                                                                            <option value="createTicket">🎫 Action: Create ServiceNow Ticket</option>
+                                                                            <option value="endWorkflow">🏁 End Workflow</option>
+                                                                        </select>
+                                                                        <div id="workflowArea" style="margin-top:10px; background:#f9f9f9; padding:10px; min-height:120px;">
+                                                                            Workflow steps will appear here...
+                                                                        </div>
+                                                                    </div>
+                                                            <h4>Globalization & Localization Module</h4>
+                                                            <label>Select Language:</label>
+                                                            <select id="langSelect" onchange="applyLocalization()">
+                                                                <option value="en-US">English (US)</option>
+                                                                <option value="fr-FR">Français (France)</option>
+                                                                <option value="es-ES">Español (Spain)</option>
+                                                                <option value="de-DE">Deutsch (Germany)</option>
+                                                                <option value="zh-CN">中文 (China)</option>
+                                                            </select>
+                                                            <label style="margin-left:20px;">Select Time Zone:</label>
+                                                            <select id="tzSelect" onchange="applyLocalization()">
+                                                                <option value="America/New_York">EST (New York)</option>
+                                                                <option value="Europe/Paris">CET (Paris)</option>
+                                                                <option value="Asia/Shanghai">CST (Shanghai)</option>
+                                                                <option value="America/Los_Angeles">WAT (Los Angeles)</option>
+                                                            </select>
+                                                            <div id="localizationArea" style="border:1px solid #ccc; padding:15px; margin-top:10px;">
+                                                                <h4>Localized Dashboard</h4>
+                                                                <p id="localizedMessage">Hello! Welcome to your dashboard.</p>
+                                                                <p id="localizedTime"></p>
+                                                            </div>
+                                                    <h4>Knowledge Base & Training Module</h4>
+                                                    <div style="border:1px solid #ccc; padding:15px; max-width:500px;">
+                                                        <h4>Training Center</h4>
+                                                        <label>Select Topic:</label><br>
+                                                        <select id="trainingSelect" onchange="loadTraining()">
+                                                            <option value="faq">❓ FAQs</option>
+                                                            <option value="tutorials">📘 Tutorials</option>
+                                                            <option value="simulations">🎮 Guided Simulations</option>
+                                                            <option value="bestPractices">🌟 Best Practices</option>
+                                                        </select>
+                                                        <div id="trainingArea" style="margin-top:10px; background:#f9f9f9; padding:10px; min-height:120px;">
+                                                            Select a topic to begin training...
+                                                        </div>
+                                                    </div>
+                                            <h4>Gamification Module</h4>
+                                            <div style="border:1px solid #ccc; padding:15px; max-width:400px;">
+                                                <p><strong>User:</strong> Alex</p>
+                                                <p><strong>Points:</strong> <span id="points">120</span></p>
+                                                <p><strong>Badges:</strong> <span id="badges">⭐ Feedback Champion</span></p>
+                                                <button onclick="earnPoints('feedback')">🗣️ Submit Feedback</button>
+                                                <button onclick="earnPoints('escalation')">🚨 Handle Escalation</button>
+                                                <button onclick="earnPoints('monitor')">📡 Monitor Notifications</button>
+                                                <div id="gameLog" style="margin-top:10px; font-size:14px; background:#f9f9f9; padding:10px; min-height:60px;">
+                                                    Ready to earn achievements...
+                                                </div>
+                                            </div>
+                                    <h4>User Feedback Loop Module</h4>
+                                    <div style="border:1px solid #ccc; padding:15px; max-width:400px;">
+                                        <p><strong>Notification:</strong> "Deployment D8 completed successfully."</p>
+                                        <label>Rate this notification:</label><br>
+                                        <select id="feedbackRating">
+                                            <option value="5">⭐️⭐️⭐️⭐️⭐️ Excellent</option>
+                                            <option value="4">⭐️⭐️⭐️⭐️ Good</option>
+                                            <option value="3">⭐️⭐️⭐️ Average</option>
+                                            <option value="2">⭐️⭐️ Poor</option>
+                                            <option value="1">⭐️ Very Poor</option>
+                                        </select><br><br>
+                                        <label>Comment:</label><br>
+                                        <textarea id="feedbackComment" rows="3" cols="40" placeholder="Enter your feedback..."></textarea><br><br>
+                                        <button onclick="submitFeedback()">Submit Feedback</button>
+                                        <div id="feedbackLog" style="margin-top:10px; font-size:14px; background:#f9f9f9; padding:10px; min-height:60px;">
+                                            Awaiting feedback...
+                                        </div>
+                                    </div>
+                            <h4>Green Sustainability Module</h4>
+                            <button onclick="runSustainabilityAnalysis()">Run Sustainability Analysis</button>
+                            <pre id="sustainLog"></pre>
+                        <h4>Cost Optimization Module</h4>
+                        <button onclick="runCostAnalysis()">Run Cost Analysis</button>
+                        <pre id="costLog"></pre>
+                    <h4>Compliance Certification Module</h4>
+                    <button onclick="runComplianceChecks()">Run Compliance Checks</button>
+                    <pre id="complianceLog"></pre>
+                <h4>Security Hardening Module</h4>
+                <button onclick="runSecurityChecks()">Run Security Checks</button>
+                <pre id="securityLog"></pre>
+            <h4>Disaster Recovery Module</h4>
+            <button onclick="backupConfig()">💾 Backup Config</button>
+            <button onclick="restoreCheckpoint()">♻️ Restore Checkpoint</button>
+            <pre id="drLog"></pre>
+        <h4>Push Notification System</h4>
+        <button onclick="triggerPushNotification()">Trigger Push Notification</button>
+        <pre id="pushLog"></pre>
+    <header>
+        <span class="dashboard-title"><i class="fa-solid fa-shield-halved"></i> SOC Artifact Dashboard</span>
+        <div class="auth">
+            <label for="username">User:</label>
+            <input type="text" id="username" placeholder="Enter username">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <span id="authStatus"></span>
+        </div>
+        <button onclick="toggleDarkMode()" title="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+    </header>
+    <div class="container">
+        <div class="controls">
+            <label>Filter Type:</label>
+            <select id="typeFilter" onchange="renderTable()">
+                <option value="">All</option>
+            </select>
+            <label>Filter Source:</label>
+            <select id="sourceFilter" onchange="renderTable()">
+                <option value="">All</option>
+            </select>
+            <label>Search:</label>
+            <input type="text" id="searchBox" placeholder="Search..." oninput="renderTable()">
+        </div>
+        <h4>Multi‑Tenant Mode</h4>
+        <label>Select Tenant:
+          <select id="tenantSelect" onchange="switchTenant()">
+            <option value="teamA">Team A</option>
+            <option value="teamB">Team B</option>
+            <option value="projectX">Project X</option>
+            <option value="projectY">Project Y</option>
+          </select>
+        </label>
+        <div id="tenantDashboard" style="border:1px solid #ccc; padding:10px; margin-top:10px;">
+          <h4>Dashboard for Team A</h4>
+          <p>Policies, analytics, monitoring, and escalations are isolated here.</p>
+        </div>
+        <h4>Custom Branding Module</h4>
+        <label>Select Tenant:
+          <select id="tenantBrandSelect" onchange="applyBranding()">
+            <option value="teamA">Team A</option>
+            <option value="teamB">Team B</option>
+            <option value="projectX">Project X</option>
+            <option value="projectY">Project Y</option>
+          </select>
+        </label>
+        <div id="brandingArea" style="border:1px solid #ccc; padding:20px; margin-top:10px;">
+          <h4 id="brandTitle">Team A Dashboard</h4>
+          <img id="brandLogo" src="https://via.placeholder.com/100x50?text=Team+A+Logo" alt="Logo">
+          <p>Custom theme applied for Team A.</p>
+        </div>
+        <h4>Plugin Integration Framework</h4>
+        <label>Select Plugin:
+          <select id="pluginSelect" onchange="loadPlugin()">
+            <option value="jira">Jira</option>
+            <option value="servicenow">ServiceNow</option>
+            <option value="slackbot">Slack Bot</option>
+            <option value="zendesk">Zendesk</option>
+          </select>
+        </label>
+        <div id="pluginArea" style="border:1px solid #ccc; padding:15px; margin-top:10px;">
+          <h4>Plugin Output</h4>
+          <p>No plugin loaded yet.</p>
+        </div>
+        <button type="button" class="collapsible">Summary Charts</button>
+        <div class="content summary-section" id="summaryCharts"></div>
+        <button type="button" class="collapsible">Artifact Table</button>
+        <div class="content" id="artifactTable"></div>
+        <div class="analytics">
+            <h3>Analytics Dashboard</h3>
+            <div id="analyticsPanel"></div>
+        </div>
+        <div class="compliance-section">
+            <h4>Real-Time Integrity Monitor</h4>
+            <div id="integrityMonitorStatus"></div>
+            <h4>Multi-Level Escalation Workflow</h4>
+            <div id="escalationWorkflowStatus"></div>
+            <h4>Custom Escalation Policy Editor</h4>
+            <textarea id="policyEditor" rows="6" cols="50" placeholder="Define escalation policies in JSON format"></textarea><br>
+            <button onclick="saveEscalationPolicies()">Save Policies</button>
+            <button onclick="loadEscalationPolicies()">Load Policies</button>
+            <div id="policyStatus"></div>
+            <h4>Policy Simulation Mode</h4>
+            <label>Simulate Tampering Count:
+                <select id="simulateTamperCount">
+                    <option value="1">1 (First detection)</option>
+                    <option value="2">2 (Persistent tampering)</option>
+                    <option value="3">3+ (Critical tampering)</option>
+                </select>
+            </label><br>
+            <button onclick="runPolicySimulation()">Run Simulation</button>
+            <div id="simulationOutput"></div>
+            <h4>Adaptive Policy Engine</h4>
+            <label><input type='checkbox' id='adaptiveToggle' onchange='toggleAdaptiveMode()'> Enable Adaptive Policy Adjustments</label>
+            <div id='adaptiveStatus'></div>
+            <h4>Visual ML Insights Dashboard</h4>
+            <canvas id='mlInsightsChart' width='400' height='200'></canvas>
+            <div id='mlAccuracy'></div>
+            <h4>Feedback Loop System</h4>
+            <label>Correct Prediction Entry (timestamp):
+                <input type='text' id='feedbackTimestamp' placeholder='Enter timestamp'>
+            </label><br>
+            <label>Correct Risk Level:
+                <select id='feedbackRisk'>
+                    <option value='Low'>Low</option>
+                    <option value='Medium'>Medium</option>
+                    <option value='High'>High</option>
+                </select>
+            </label><br>
+            <button onclick='submitFeedback()'>Submit Feedback</button>
+            <div id='feedbackStatus'></div>
+            <div id='mlOutput'></div>
+            <h4>Continuous Learning Mode</h4>
+            <label><input type='checkbox' id='continuousToggle' onchange='toggleContinuousLearning()'> Enable Continuous Learning</label>
+            <div id='continuousStatus'></div>
+            <div id="auditTrailPanel" style="margin-top:20px;"></div>
+            <h4>Self‑Healing Automation Module</h4>
+            <button onclick="runSelfHealing()">Run Self‑Healing</button>
+            <pre id="healingLog"></pre>
+            <h4>Policy‑Driven Governance Layer</h4>
+            <textarea id="policyRules" rows="6" cols="60" placeholder="Enter policy rules here..."></textarea><br>
+            <button onclick="applyPolicies()">Apply Policies</button>
+            <pre id="policyLog"></pre>
+            <h4>Role‑Based Access Control</h4>
+            <label>User Role:
+              <select id="userRole">
+                <option value="admin">Admin</option>
+                <option value="dev">Developer</option>
+                <option value="qa">QA</option>
+                <option value="viewer">Viewer</option>
+              </select>
+            </label><br>
+            <button onclick="checkAccess()">Check Access</button>
+            <pre id="rbacLog"></pre>
+            <h4>Audit Logging System</h4>
+            <button onclick="logAction('Policy Change')">Log Policy Change</button>
+            <button onclick="logAction('Deployment')">Log Deployment</button>
+            <button onclick="logAction('Escalation')">Log Escalation</button>
+            <pre id="auditLog"></pre>
+            <h4>Real‑Time Monitoring Dashboard</h4>
+            <div id="liveFeed" style="border:1px solid #ccc; padding:10px; height:200px; overflow-y:auto;">
+              <strong>Live Feed:</strong><br>
+            </div>
+            <button onclick="simulateLiveEvents()">Start Live Monitoring</button>
+            <button id="block-btn" class="action-btn" onclick="executeBlockUI()">Execute Firewall Block</button>
+            <button onclick="downloadReport()">Download Audit PDF</button>
+            <div id="current-incident-url" style="display:none;">malicious-domain.com</div>
+            <div class="mfa-tracker-box">
+                <h3>Live MFA Interception Tracker</h3>
+                <div class="count-display">
+                    <span id="mfa-count">0</span>
+                    <p>Tokens Intercepted (Last 24h)</p>
+                </div>
+            </div>
+            <style>
+            .mfa-tracker-box { background: #111; border: 1px solid #333; padding: 20px; text-align: center; }
+            .count-display span { font-size: 3rem; color: #ff4d4d; font-weight: bold; }
+            </style>
+        </div>
+        <h4>Machine Learning Insights Module</h4>
+        <button onclick="runMLInsights()">Run ML Insights</button>
+        <pre id="mlLog"></pre>
+        <h4>Voice Command Module</h4>
+        <button onclick="startVoiceCommand()">🎤 Start Voice Command</button>
+        <pre id="voiceLog"></pre>
+        <h4>Mobile Companion App Interface</h4>
+                <div id="mobileApp" style="border:1px solid #ccc; padding:15px; max-width:370px; font-family:sans-serif; border-radius:12px; box-shadow:0 2px 8px #ddd; background:#fff;">
+                                                            <div style="margin-bottom:10px; display:flex; gap:5px;">
+                                                                <button style="flex:1;" onclick="mobileAction('refresh')">🔄 Refresh</button>
+                                                                <button style="flex:1;" onclick="mobileAction('export')">📤 Export</button>
+                                                                <input id="mobileDate" type="date" style="flex:2; padding:6px; border-radius:6px; border:1px solid #ccc;" onchange="mobileAction('filterdate')">
+                                                            </div>
+                                                            <div id="mobileChartPanel" style="margin:10px 0; background:#fafafa; border-radius:8px; padding:10px;">
+                                                                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                                                                    <label for="mobileChartType">Chart Type:</label>
+                                                                    <select id="mobileChartType" onchange="mobileAction('analytics')">
+                                                                        <option value="bar">Bar</option>
+                                                                        <option value="pie">Pie</option>
+                                                                        <option value="line">Line</option>
+                                                                    </select>
+                                                                    <button onclick="clearMobileLog()" style="padding:4px 10px; border-radius:6px; border:1px solid #ccc;">🧹 Clear Log</button>
+                                                                    <button onclick="mobileAction('sendPush')" style="padding:4px 10px; border-radius:6px; border:1px solid #ccc; background:#607D8B; color:#fff;">Send Real Push</button>
+                                                                    <button onclick="mobileAction('showTypeBreakdown')" style="padding:4px 10px; border-radius:6px; border:1px solid #ccc; background:#4CAF50; color:#fff;">Type Breakdown</button>
+                                                                </div>
+                                                                <canvas id="mobileAnalyticsChart" width="320" height="180"></canvas>
+                                                                <canvas id="typeBreakdownChart" width="320" height="180" style="display:none; margin-top:10px;"></canvas>
+                                                            </div>
+                                                            <div style="margin-bottom:10px;">
+                                                                <button style="width:100%; background:#607D8B; color:#fff; border:none; border-radius:6px; padding:8px; font-size:16px; margin-top:5px;" onclick="registerMobilePush()">🔔 Register for Real Push Notifications</button>
+                                                            </div>
+                                        <div style="margin-bottom:10px;">
+                                            <label for="mobileRole">Role:</label>
+                                            <select id="mobileRole" style="padding:6px; border-radius:6px; border:1px solid #ccc;">
+                                                <option value="admin">Admin</option>
+                                                <option value="dev">Developer</option>
+                                                <option value="qa">QA</option>
+                                                <option value="viewer">Viewer</option>
+                                            </select>
+                                        </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <h4 style="margin:0;">📱 Notification Dashboard</h4>
+                        <button onclick="toggleMobileDarkMode()" style="border:none; background:none; font-size:20px; cursor:pointer;" title="Toggle Dark Mode">🌙</button>
+                    </div>
+                    <div style="margin:10px 0; display:flex; gap:5px;">
+                                    <button style="flex:1;" onclick="mobileAction('analytics')">📈 Analytics</button>
+                                    <button style="flex:1;" onclick="mobileAction('pushalert')">🔔 Push Alert</button>
+                        <button style="flex:1;" onclick="mobileAction('status')">📊 Status</button>
+                        <button style="flex:1;" onclick="mobileAction('query')">💬 Query</button>
+                        <button style="flex:1;" onclick="mobileAction('monitor')">📡 Monitor</button>
+                        <button style="flex:1;" onclick="mobileAction('escalate')">🚨 Escalate</button>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                                    <button style="width:100%; background:#FF9800; color:#fff; border:none; border-radius:6px; padding:8px; font-size:16px; margin-top:5px;" onclick="mobileAction('rbac')">🔑 Check Access</button>
+                        <input id="mobileFilter" type="text" placeholder="Quick filter..." style="width:100%; padding:6px; border-radius:6px; border:1px solid #ccc;" oninput="mobileQuickFilter()">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <button style="width:100%; background:#4CAF50; color:#fff; border:none; border-radius:6px; padding:8px; font-size:16px;" onclick="startMobileVoiceQuery()">🎤 Voice Command</button>
+                        <button style="width:100%; background:#2196F3; color:#fff; border:none; border-radius:6px; padding:8px; font-size:16px; margin-top:5px;" onclick="simulatePushAlert()">🔔 Simulate Push Notification</button>
+                    </div>
+                    <div id="mobileLog" style="margin-top:10px; font-size:15px; background:#f9f9f9; padding:12px; min-height:110px; border-radius:8px;">
+                        Ready for mobile commands...
+                    </div>
+                </div>
+        <script>
+                                                                                                                                        // Fetch biometric data from local API (simulated Windows Hello/webcam)
+                                                                                                                                        function fetchBioFromAPI() {
+                                                                                                                                            const log = [];
+                                                                                                                                            log.push("🔄 Fetching biometric data from local API...");
+                                                                                                                                            fetch("http://localhost:5000/api/biometric")
+                                                                                                                                                .then(response => response.json())
+                                                                                                                                                .then(bioSignals => {
+                                                                                                                                                    log.push("🧬 Bio‑Adaptive Scan Results:");
+                                                                                                                                                    log.push(`Stress Level: ${bioSignals.stressLevel}`);
+                                                                                                                                                    log.push(`Focus Level: ${bioSignals.focusLevel}`);
+                                                                                                                                                    log.push(`Fatigue Level: ${bioSignals.fatigueLevel}`);
+                                                                                                                                                    if (bioSignals.stressLevel === "high") {
+                                                                                                                                                        log.push("💡 Adjustment: Notifications softened in tone, escalation delayed to reduce pressure.");
+                                                                                                                                                    }
+                                                                                                                                                    if (bioSignals.focusLevel === "low") {
+                                                                                                                                                        log.push("💡 Adjustment: Critical alerts highlighted, non‑urgent notifications postponed.");
+                                                                                                                                                    }
+                                                                                                                                                    if (bioSignals.fatigueLevel === "moderate") {
+                                                                                                                                                        log.push("💡 Adjustment: Notifications batched to avoid overload, summaries provided.");
+                                                                                                                                                    }
+                                                                                                                                                    log.push("✅ Bio‑adaptive interface applied. Notifications tuned to user’s biometric state.");
+                                                                                                                                                    document.getElementById("bioLog").textContent = log.join("\n");
+                                                                                                                                                })
+                                                                                                                                                .catch(err => {
+                                                                                                                                                    log.push("❌ Error: Unable to fetch biometric data from API. Is the local service running?");
+                                                                                                                                                    document.getElementById("bioLog").textContent = log.join("\n");
+                                                                                                                                                });
+                                                                                                                                        }
+                                                                                                                                    function runCollectiveIntelligence() {
+                                                                                                                                        const log = [];
+                                                                                                                                        let inputs;
+                                                                                                                                        const chatInput = document.getElementById("chatInput").value;
+                                                                                                                                        try {
+                                                                                                                                            inputs = JSON.parse(chatInput);
+                                                                                                                                        } catch (e) {
+                                                                                                                                            log.push("❌ Invalid JSON. Please paste valid recommendations.");
+                                                                                                                                            document.getElementById("collectiveLog").textContent = log.join("\n");
+                                                                                                                                            return;
+                                                                                                                                        }
+                                                                                                                                        if (!Array.isArray(inputs) || inputs.length === 0) {
+                                                                                                                                            log.push("⚠️ No recommendations found. Please provide input.");
+                                                                                                                                            document.getElementById("collectiveLog").textContent = log.join("\n");
+                                                                                                                                            return;
+                                                                                                                                        }
+                                                                                                                                        log.push("🌍 Collective Intelligence Consensus Started...");
+                                                                                                                                        inputs.forEach(i => log.push(`👥 ${i.source}: ${i.recommendation} (weight: ${i.weight || 1})`));
+                                                                                                                                        // Weighted average consensus logic
+                                                                                                                                        const recWeights = {};
+                                                                                                                                        let totalWeight = 0;
+                                                                                                                                        inputs.forEach(i => {
+                                                                                                                                            const rec = i.recommendation;
+                                                                                                                                            const w = i.weight || 1;
+                                                                                                                                            recWeights[rec] = (recWeights[rec] || 0) + w;
+                                                                                                                                            totalWeight += w;
+                                                                                                                                        });
+                                                                                                                                        // Find recommendation with highest weighted score
+                                                                                                                                        let consensus = null;
+                                                                                                                                        let maxScore = -Infinity;
+                                                                                                                                        for (const rec in recWeights) {
+                                                                                                                                            if (recWeights[rec] > maxScore) {
+                                                                                                                                                maxScore = recWeights[rec];
+                                                                                                                                                consensus = rec;
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                                                                        log.push("🧠 Consensus Decision: " + consensus);
+                                                                                                                                        log.push("💡 Insight: Weighted average consensus reflects participant influence.");
+                                                                                                                                        log.push("✅ Consensus applied. Workflow updated dynamically.");
+                                                                                                                                        document.getElementById("collectiveLog").textContent = log.join("\n");
+                                                                                                                                    }
+                                                                                                                                function runBioAdaptive() {
+                                                                                                                                    const log = [];
+                                                                                                                                    const fileInput = document.getElementById("bioFile");
+                                                                                                                                    const file = fileInput.files[0];
+                                                                                                                                    if (!file) {
+                                                                                                                                        log.push("⚠️ Please select a biometric data file (.json) from your custom sensor/device.");
+                                                                                                                                        document.getElementById("bioLog").textContent = log.join("\n");
+                                                                                                                                        return;
+                                                                                                                                    }
+                                                                                                                                    const reader = new FileReader();
+                                                                                                                                    reader.onload = function(e) {
+                                                                                                                                        try {
+                                                                                                                                            const bioSignals = JSON.parse(e.target.result);
+                                                                                                                                            log.push("🧬 Bio‑Adaptive Scan Results:");
+                                                                                                                                            log.push(`Stress Level: ${bioSignals.stressLevel}`);
+                                                                                                                                            log.push(`Focus Level: ${bioSignals.focusLevel}`);
+                                                                                                                                            log.push(`Fatigue Level: ${bioSignals.fatigueLevel}`);
+                                                                                                                                            if (bioSignals.stressLevel === "high") {
+                                                                                                                                                log.push("💡 Adjustment: Notifications softened in tone, escalation delayed to reduce pressure.");
+                                                                                                                                            }
+                                                                                                                                            if (bioSignals.focusLevel === "low") {
+                                                                                                                                                log.push("💡 Adjustment: Critical alerts highlighted, non‑urgent notifications postponed.");
+                                                                                                                                            }
+                                                                                                                                            if (bioSignals.fatigueLevel === "moderate") {
+                                                                                                                                                log.push("💡 Adjustment: Notifications batched to avoid overload, summaries provided.");
+                                                                                                                                            }
+                                                                                                                                            log.push("✅ Bio‑adaptive interface applied. Notifications tuned to user’s biometric state.");
+                                                                                                                                        } catch (err) {
+                                                                                                                                            log.push("❌ Error: Invalid biometric data file format. Please upload a valid JSON file.");
+                                                                                                                                        }
+                                                                                                                                        document.getElementById("bioLog").textContent = log.join("\n");
+                                                                                                                                    };
+                                                                                                                                    reader.readAsText(file);
+                                                                                                                                }
+                                                                                                                            function analyzeFeedback() {
+                                                                                                                                const input = document.getElementById("feedbackInput").value.toLowerCase();
+                                                                                                                                const log = [];
+                                                                                                                                if (input.includes("frustrated") || input.includes("upset")) {
+                                                                                                                                    log.push("😡 Sentiment Detected: Negative");
+                                                                                                                                    log.push("💡 Adjustment: Escalation sensitivity increased. Notifications will use a calmer tone and prioritize resolution.");
+                                                                                                                                } else if (input.includes("happy") || input.includes("great")) {
+                                                                                                                                    log.push("😊 Sentiment Detected: Positive");
+                                                                                                                                    log.push("💡 Adjustment: Notifications will maintain friendly tone and reduce unnecessary escalations.");
+                                                                                                                                } else if (input.includes("confused") || input.includes("unclear")) {
+                                                                                                                                    log.push("😕 Sentiment Detected: Neutral/Confused");
+                                                                                                                                    log.push("💡 Adjustment: Notifications will include more context and guidance.");
+                                                                                                                                } else {
+                                                                                                                                    log.push("🤖 Sentiment Analysis: Unable to classify clearly.");
+                                                                                                                                    log.push("💡 Adjustment: Default balanced tone applied.");
+                                                                                                                                }
+                                                                                                                                log.push("✅ Feedback loop complete. Notification tone and escalation rules updated dynamically.");
+                                                                                                                                document.getElementById("feedbackLog").textContent = log.join("\n");
+                                                                                                                            }
+                                                                                                                        function launchHolographicCenter() {
+                                                                                                                            const log = [];
+                                                                                                                            // Simulated holographic elements
+                                                                                                                            const holoElements = [
+                                                                                                                                "📡 Live Notification Streams (floating holograms)",
+                                                                                                                                "📊 Analytics Dashboards (3D charts & graphs)",
+                                                                                                                                "⚙️ Workflow Builder (gesture‑based editing)",
+                                                                                                                                "🚨 Escalation Paths (animated holographic arrows)",
+                                                                                                                                "🌍 Global Map (interactive holographic globe)"
+                                                                                                                            ];
+                                                                                                                            log.push("🌐 Holographic Command Center Activated:");
+                                                                                                                            holoElements.forEach(e => log.push(`- ${e}`));
+                                                                                                                            log.push("🖐️ Gesture Controls: Pinch, swipe, and rotate to interact with holographic data.");
+                                                                                                                            log.push("💡 Insight: Admins can walk through workflows and analytics in an immersive holographic environment.");
+                                                                                                                            log.push("✅ Simulation complete. Ready for holographic deployment.");
+                                                                                                                            document.getElementById("holoLog").textContent = log.join("\n");
+                                                                                                                        }
+                                                                                                                    function runAdaptiveOptimization() {
+                                                                                                                        const log = [];
+                                                                                                                        // Simulated historical outcomes
+                                                                                                                        const outcomes = [
+                                                                                                                            {id:"D1", retries:2, escalations:0, success:true},
+                                                                                                                            {id:"D2", retries:5, escalations:1, success:false},
+                                                                                                                            {id:"D3", retries:1, escalations:0, success:true},
+                                                                                                                            {id:"D4", retries:7, escalations:2, success:false},
+                                                                                                                            {id:"D5", retries:2, escalations:0, success:true}
+                                                                                                                        ];
+                                                                                                                        // Adaptive learning: adjust retry intervals & escalation policies
+                                                                                                                        const avgRetries = outcomes.reduce((a,b)=>a+b.retries,0)/outcomes.length;
+                                                                                                                        const failureRate = outcomes.filter(o=>!o.success).length / outcomes.length;
+                                                                                                                        log.push("🧠 Neural Optimization Results:");
+                                                                                                                        log.push(`🔄 Average Retries: ${avgRetries.toFixed(1)}`);
+                                                                                                                        log.push(`🚨 Failure Rate: ${(failureRate*100).toFixed(1)}%`);
+                                                                                                                        if (avgRetries > 4) {
+                                                                                                                            log.push("💡 Adjustment: Reduce retry interval to minimize wasted cycles.");
+                                                                                                                        }
+                                                                                                                        if (failureRate > 0.3) {
+                                                                                                                            log.push("💡 Adjustment: Strengthen escalation policy for faster resolution.");
+                                                                                                                        }
+                                                                                                                        log.push("✅ Adaptive learning applied. System workflows fine‑tuned automatically.");
+                                                                                                                        document.getElementById("adaptiveLog").textContent = log.join("\n");
+                                                                                                                    }
+                                                                                                                function runFusion() {
+                                                                                                                    const log = [];
+                                                                                                                    // Simulated workflow steps
+                                                                                                                    const workflow = [
+                                                                                                                        "⚠️ Trigger: Failure Detected",
+                                                                                                                        "🔄 Retry Notification",
+                                                                                                                        "🚨 Escalate to Admin",
+                                                                                                                        "💬 Notify Slack Channel",
+                                                                                                                        "🎫 Create ServiceNow Ticket",
+                                                                                                                        "🏁 End Workflow"
+                                                                                                                    ];
+                                                                                                                    log.push("🧪 Digital Twin Simulation Started...");
+                                                                                                                    workflow.forEach((step, index) => {
+                                                                                                                        log.push(`Step ${index+1}: ${step}`);
+                                                                                                                    });
+                                                                                                                    log.push("🤖 RPA Triggered Automatically:");
+                                                                                                                    log.push("- 📑 Reviewing simulated logs");
+                                                                                                                    log.push("- ⚖️ Running compliance checks");
+                                                                                                                    log.push("- 📊 Generating predictive analytics report");
+                                                                                                                    log.push("- 🔒 Verifying audit trail integrity");
+                                                                                                                    log.push("✅ Fusion Complete: Simulation outcomes executed by RPA.");
+                                                                                                                    log.push("💡 Insight: Preventive actions now automated directly from simulation results.");
+                                                                                                                    document.getElementById("fusionLog").textContent = log.join("\n");
+                                                                                                                }
+                                                                                                            function runRPA() {
+                                                                                                                const log = [];
+                                                                                                                // Simulated automated tasks
+                                                                                                                const tasks = [
+                                                                                                                    "📑 Reviewing 500+ notification logs",
+                                                                                                                    "⚖️ Running compliance checks against GDPR & ISO",
+                                                                                                                    "📊 Generating weekly analytics report",
+                                                                                                                    "🔒 Verifying security audit trail",
+                                                                                                                    "✅ Sending summary to Admin Dashboard"
+                                                                                                                ];
+                                                                                                                log.push("🤖 RPA Execution Started...");
+                                                                                                                tasks.forEach(t => log.push(`- ${t}`));
+                                                                                                                log.push("💡 Insight: RPA completed all repetitive tasks in seconds.");
+                                                                                                                log.push("✅ Admin workload reduced. Reports and compliance logs ready.");
+                                                                                                                document.getElementById("rpaLog").textContent = log.join("\n");
+                                                                                                            }
+                                                                                                        function runEthicsCheck() {
+                                                                                                            const log = [];
+                                                                                                            // Simulated compliance checks
+                                                                                                            const checks = {
+                                                                                                                fairness: true,
+                                                                                                                transparency: true,
+                                                                                                                biasMitigation: false, // Example: needs improvement
+                                                                                                                globalStandards: true
+                                                                                                            };
+                                                                                                            log.push("⚖️ Ethics & Governance Audit Results:");
+                                                                                                            if (checks.fairness) {
+                                                                                                                log.push("✅ Fairness enforced: Notifications delivered without discrimination.");
+                                                                                                            } else {
+                                                                                                                log.push("❌ Fairness gap detected. Review policies.");
+                                                                                                            }
+                                                                                                            if (checks.transparency) {
+                                                                                                                log.push("✅ Transparency active: All decisions logged and explainable.");
+                                                                                                            } else {
+                                                                                                                log.push("❌ Transparency missing. Enable audit trails.");
+                                                                                                            }
+                                                                                                            if (checks.biasMitigation) {
+                                                                                                                log.push("✅ Bias mitigation enabled: Algorithms monitored for fairness.");
+                                                                                                            } else {
+                                                                                                                log.push("⚠️ Bias mitigation not fully active. Recommend enabling bias detection tools.");
+                                                                                                            }
+                                                                                                            if (checks.globalStandards) {
+                                                                                                                log.push("✅ Compliance with GDPR, ISO, and global AI ethics frameworks.");
+                                                                                                            } else {
+                                                                                                                log.push("❌ Compliance gaps. Review international standards.");
+                                                                                                            }
+                                                                                                            log.push("💡 Insight: Ethical governance strengthens trust, compliance, and long‑term sustainability.");
+                                                                                                            document.getElementById("ethicsLog").textContent = log.join("\n");
+                                                                                                        }
+                                                                                                    function runARVisualization() {
+                                                                                                        const log = [];
+                                                                                                        // Simulated AR elements
+                                                                                                        const arElements = [
+                                                                                                            "📡 Live Notification Flow (3D stream of alerts)",
+                                                                                                            "📈 Analytics Graphs (floating bar & line charts)",
+                                                                                                            "⚙️ System Health Indicators (color‑coded holograms)",
+                                                                                                            "🚨 Escalation Paths (animated arrows to admins)",
+                                                                                                            "🌍 Global Map View (localized notifications in AR)"
+                                                                                                        ];
+                                                                                                        log.push("🕶️ AR Dashboard Activated:");
+                                                                                                        arElements.forEach(e => log.push(`- ${e}`));
+                                                                                                        log.push("💡 Insight: Admins can interact with holographic dashboards, pinch‑zoom analytics, and walk through escalation paths in AR.");
+                                                                                                        log.push("✅ Simulation complete. Ready for immersive deployment.");
+                                                                                                        document.getElementById("arLog").textContent = log.join("\n");
+                                                                                                    }
+                                                                                                function runAssistant() {
+                                                                                                    const input = document.getElementById("assistantInput").value.toLowerCase();
+                                                                                                    const log = [];
+                                                                                                    if (input.includes("status")) {
+                                                                                                        log.push("📊 Current System Status: All notifications delivered successfully. No pending escalations.");
+                                                                                                    } else if (input.includes("workflow")) {
+                                                                                                        log.push("🔄 Workflow Builder: Would you like me to create a retry + escalation workflow?");
+                                                                                                    } else if (input.includes("analytics")) {
+                                                                                                        log.push("📈 Analytics Insight: Failure rate is below 2%. Average retries per notification: 2.3.");
+                                                                                                    } else if (input.includes("help")) {
+                                                                                                        log.push("🧾 Help Menu: You can ask me about system status, workflows, analytics, or preferences.");
+                                                                                                    } else {
+                                                                                                        log.push("🤖 Assistant: I didn’t quite catch that. Try asking about status, workflows, analytics, or help.");
+                                                                                                    }
+                                                                                                    document.getElementById("assistantLog").textContent = log.join("\n");
+                                                                                                }
+                                                                                            let collaborators = ["Alex", "Maria", "Jason"];
+                                                                                            function startCollaboration() {
+                                                                                                const log = [];
+                                                                                                const timestamp = new Date().toLocaleTimeString();
+                                                                                                log.push(`🤝 Collaboration Session Started at ${timestamp}`);
+                                                                                                log.push("👥 Active Collaborators:");
+                                                                                                collaborators.forEach(c => log.push(`- ${c}`));
+                                                                                                log.push("📝 Shared Editing Enabled: Workflow templates and dashboards can be co‑edited in real time.");
+                                                                                                log.push("💡 Insight: Changes are synced instantly across all participants.");
+                                                                                                document.getElementById("collabLog").textContent = log.join("\n");
+                                                                                            }
+                                                                                        function runIntegrationTest() {
+                                                                                            const log = [];
+                                                                                            // Simulated integrations
+                                                                                            const integrations = {
+                                                                                                jira: true,
+                                                                                                serviceNow: true,
+                                                                                                gitHub: false, // Example: not yet connected
+                                                                                                awsCloud: true
+                                                                                            };
+                                                                                            log.push("🔗 Integration Hub Status:");
+                                                                                            if (integrations.jira) {
+                                                                                                log.push("✅ Jira connected: Issue creation enabled.");
+                                                                                            } else {
+                                                                                                log.push("❌ Jira not connected. Configure API key.");
+                                                                                            }
+                                                                                            if (integrations.serviceNow) {
+                                                                                                log.push("✅ ServiceNow connected: Incident escalation active.");
+                                                                                            } else {
+                                                                                                log.push("❌ ServiceNow not connected. Check credentials.");
+                                                                                            }
+                                                                                            if (integrations.gitHub) {
+                                                                                                log.push("✅ GitHub connected: Deployment alerts synced.");
+                                                                                            } else {
+                                                                                                log.push("⚠️ GitHub not connected. Recommend enabling for DevOps visibility.");
+                                                                                            }
+                                                                                            if (integrations.awsCloud) {
+                                                                                                log.push("✅ AWS Cloud connected: Resource monitoring integrated.");
+                                                                                            } else {
+                                                                                                log.push("❌ AWS Cloud not connected. Configure IAM roles.");
+                                                                                            }
+                                                                                            log.push("💡 Insight: Cross‑platform hub ensures unified workflows across tools.");
+                                                                                            document.getElementById("integrationLog").textContent = log.join("\n");
+                                                                                        }
+                                                                                    function savePreferences() {
+                                                                                        const channels = [];
+                                                                                        if (document.getElementById("email").checked) channels.push("Email");
+                                                                                        if (document.getElementById("sms").checked) channels.push("SMS");
+                                                                                        if (document.getElementById("slack").checked) channels.push("Slack");
+                                                                                        if (document.getElementById("teams").checked) channels.push("Teams");
+                                                                                        const escalation = document.getElementById("escalationRule").value;
+                                                                                        const topics = [];
+                                                                                        if (document.getElementById("deployments").checked) topics.push("Deployments");
+                                                                                        if (document.getElementById("incidents").checked) topics.push("Incidents");
+                                                                                        if (document.getElementById("maintenance").checked) topics.push("Maintenance");
+                                                                                        const log = [];
+                                                                                        log.push("🖥️ Preferences Saved:");
+                                                                                        log.push(`Channels: ${channels.join(", ")}`);
+                                                                                        log.push(`Escalation Rule: ${escalation}`);
+                                                                                        log.push(`Subscriptions: ${topics.join(", ")}`);
+                                                                                        log.push("✅ Self‑service update complete. No admin required.");
+                                                                                        document.getElementById("portalLog").textContent = log.join("\n");
+                                                                                    }
+                                                                                function runZeroTrustCheck() {
+                                                                                    const log = [];
+                                                                                    // Simulated checks
+                                                                                    const identityVerified = true;
+                                                                                    const deviceTrusted = false; // Example: device not yet verified
+                                                                                    const sessionActive = true;
+                                                                                    if (identityVerified) {
+                                                                                        log.push("✅ Identity verified: MFA authentication passed.");
+                                                                                    } else {
+                                                                                        log.push("❌ Identity verification failed. Access denied.");
+                                                                                    }
+                                                                                    if (deviceTrusted) {
+                                                                                        log.push("✅ Device trust confirmed: compliant with security policies.");
+                                                                                    } else {
+                                                                                        log.push("⚠️ Device not trusted. Recommend endpoint compliance check.");
+                                                                                    }
+                                                                                    if (sessionActive) {
+                                                                                        log.push("✅ Session validated: continuous monitoring active.");
+                                                                                    } else {
+                                                                                        log.push("❌ Session expired. Re‑authentication required.");
+                                                                                    }
+                                                                                    log.push("🔒 Overall Status: Zero‑Trust enforced. No implicit trust granted.");
+                                                                                    document.getElementById("zeroTrustLog").textContent = log.join("\n");
+                                                                                }
+                                                                            function runQuantumCrypto() {
+                                                                                const log = [];
+                                                                                // Simulated checks
+                                                                                const algorithms = {
+                                                                                    latticeBased: true,
+                                                                                    hashBased: true,
+                                                                                    codeBased: false // Example: not yet enabled
+                                                                                };
+                                                                                if (algorithms.latticeBased) {
+                                                                                    log.push("✅ Lattice‑based encryption enabled (resistant to quantum attacks).");
+                                                                                } else {
+                                                                                    log.push("❌ Lattice‑based encryption not enabled. Recommend upgrade.");
+                                                                                }
+                                                                                if (algorithms.hashBased) {
+                                                                                    log.push("✅ Hash‑based signatures active (quantum‑safe).");
+                                                                                } else {
+                                                                                    log.push("❌ Hash‑based signatures missing. Recommend enabling.");
+                                                                                }
+                                                                                if (algorithms.codeBased) {
+                                                                                    log.push("✅ Code‑based cryptography enabled.");
+                                                                                } else {
+                                                                                    log.push("⚠️ Code‑based cryptography not yet active. Consider enabling for redundancy.");
+                                                                                }
+                                                                                log.push("🔒 Overall Status: System secured with quantum‑resistant algorithms.");
+                                                                                document.getElementById("quantumLog").textContent = log.join("\n");
+                                                                            }
+                                                                        let blockchain = [];
+                                                                        function recordEvent() {
+                                                                            const timestamp = new Date().toLocaleString();
+                                                                            const event = {
+                                                                                id: `TX-${Date.now()}`,
+                                                                                message: "Notification sent to Admin via Slack",
+                                                                                timestamp: timestamp,
+                                                                                hash: Math.random().toString(36).substring(2, 12) // simulated hash
+                                                                            };
+                                                                            blockchain.push(event);
+                                                                            const log = [];
+                                                                            log.push("⛓️ Blockchain Ledger Entry Created:");
+                                                                            log.push(`ID: ${event.id}`);
+                                                                            log.push(`Message: ${event.message}`);
+                                                                            log.push(`Timestamp: ${event.timestamp}`);
+                                                                            log.push(`Hash: ${event.hash}`);
+                                                                            log.push("✅ Immutable record stored. Cannot be altered or deleted.");
+                                                                            document.getElementById("blockchainLog").textContent = log.join("\n");
+                                                                        }
+                                                                    function runSimulation() {
+                                                                        const log = [];
+                                                                        // Simulated workflow steps
+                                                                        const workflow = [
+                                                                            "⚠️ Trigger: Failure Detected",
+                                                                            "🔄 Retry Notification",
+                                                                            "🚨 Escalate to Admin",
+                                                                            "💬 Notify Slack Channel",
+                                                                            "🎫 Create ServiceNow Ticket",
+                                                                            "🏁 End Workflow"
+                                                                        ];
+                                                                        log.push("🧪 Simulation Started...");
+                                                                        workflow.forEach((step, index) => {
+                                                                            log.push(`Step ${index+1}: ${step}`);
+                                                                        });
+                                                                        log.push("✅ Simulation Complete. No live systems impacted.");
+                                                                        log.push("💡 Insight: Workflow executed successfully in digital twin. Ready for deployment.");
+                                                                        document.getElementById("simulationLog").textContent = log.join("\n");
+                                                                    }
+                                                                function runPredictiveMaintenance() {
+                                                                    const log = [];
+                                                                    // Simulated historical dataset
+                                                                    const history = [
+                                                                        {id:"D1", failures:0, retries:2, escalations:0},
+                                                                        {id:"D2", failures:1, retries:5, escalations:1},
+                                                                        {id:"D3", failures:0, retries:1, escalations:0},
+                                                                        {id:"D4", failures:2, retries:7, escalations:2},
+                                                                        {id:"D5", failures:0, retries:2, escalations:0},
+                                                                        {id:"D6", failures:1, retries:6, escalations:1}
+                                                                    ];
+                                                                    // Simple predictive logic: if retries > 5 or escalations > 1, forecast risk
+                                                                    const riskForecast = history.filter(h => h.retries > 5 || h.escalations > 1);
+                                                                    if (riskForecast.length > 0) {
+                                                                        log.push("🔮 Predictive Maintenance Alerts:");
+                                                                        riskForecast.forEach(r => log.push(`Deployment ${r.id} → High risk of future failure (Retries: ${r.retries}, Escalations: ${r.escalations})`));
+                                                                        log.push("💡 Recommendation: Review retry intervals, strengthen escalation policies, and run preventive diagnostics.");
+                                                                    } else {
+                                                                        log.push("✅ No high‑risk patterns detected. System expected to remain stable.");
+                                                                    }
+                                                                    document.getElementById("maintenanceLog").textContent = log.join("\n");
+                                                                }
+                                                            function runAnomalyDetection() {
+                                                                const log = [];
+                                                                // Simulated dataset
+                                                                const logs = [
+                                                                    {id:"D1", status:"success", retries:2, escalations:0},
+                                                                    {id:"D2", status:"failure", retries:5, escalations:1},
+                                                                    {id:"D3", status:"success", retries:1, escalations:0},
+                                                                    {id:"D4", status:"failure", retries:9, escalations:3}, // anomaly
+                                                                    {id:"D5", status:"success", retries:2, escalations:0},
+                                                                    {id:"D6", status:"warning", retries:7, escalations:2}, // anomaly
+                                                                    {id:"D7", status:"success", retries:2, escalations:0}
+                                                                ];
+                                                                // Simple anomaly detection: unusually high retries or escalations
+                                                                const anomalies = logs.filter(l => l.retries > 6 || l.escalations > 2);
+                                                                if (anomalies.length > 0) {
+                                                                    log.push("🚨 Anomalies detected:");
+                                                                    anomalies.forEach(a => log.push(`Deployment ${a.id} | Retries: ${a.retries} | Escalations: ${a.escalations}`));
+                                                                    log.push("💡 Insight: These patterns deviate from normal behavior. Recommend root cause analysis.");
+                                                                } else {
+                                                                    log.push("✅ No anomalies detected. System behavior within normal thresholds.");
+                                                                }
+                                                                document.getElementById("anomalyLog").textContent = log.join("\n");
+                                                            }
+                                                        function runBigDataQuery() {
+                                                            const log = [];
+                                                            // Simulated large dataset
+                                                            const logs = [
+                                                                {id:"D1", status:"success", retries:2, escalations:0},
+                                                                {id:"D2", status:"failure", retries:5, escalations:1},
+                                                                {id:"D3", status:"warning", retries:3, escalations:0},
+                                                                {id:"D4", status:"failure", retries:6, escalations:2},
+                                                                {id:"D5", status:"success", retries:1, escalations:0},
+                                                                {id:"D6", status:"failure", retries:4, escalations:1},
+                                                                {id:"D7", status:"success", retries:2, escalations:0}
+                                                            ];
+                                                            // Example big data query: aggregate failures
+                                                            const failures = logs.filter(l => l.status === "failure").length;
+                                                            const avgRetries = logs.reduce((a,b)=>a+b.retries,0)/logs.length;
+                                                            const totalEscalations = logs.reduce((a,b)=>a+b.escalations,0);
+                                                            log.push(`📊 Failures: ${failures}`);
+                                                            log.push(`🔄 Average Retries: ${avgRetries.toFixed(1)}`);
+                                                            log.push(`🚨 Total Escalations: ${totalEscalations}`);
+                                                            // Advanced insight
+                                                            if (failures > 2) {
+                                                                log.push("💡 Insight: Failure rate exceeds threshold. Recommend deeper root cause analysis.");
+                                                            }
+                                                            if (avgRetries > 3) {
+                                                                log.push("🔧 Insight: Retry counts high. Suggest optimizing retry intervals.");
+                                                            }
+                                                            document.getElementById("dataLakeLog").textContent = log.join("\n");
+                                                        }
+                                                    let workflow = [];
+                                                    function addStep() {
+                                                        const step = document.getElementById("workflowStep").value;
+                                                        if (!step) return;
+                                                        const stepMap = {
+                                                            triggerFailure: "⚠️ Trigger: Failure Detected",
+                                                            retry: "🔄 Action: Retry Notification",
+                                                            escalate: "🚨 Action: Escalate to Admin",
+                                                            notifySlack: "💬 Action: Notify Slack Channel",
+                                                            createTicket: "🎫 Action: Create ServiceNow Ticket",
+                                                            endWorkflow: "🏁 End Workflow"
+                                                        };
+                                                        workflow.push(stepMap[step]);
+                                                        document.getElementById("workflowArea").textContent = workflow.join(" → ");
+                                                    }
+                                                function applyLocalization() {
+                                                    const lang = document.getElementById("langSelect").value;
+                                                    const tz = document.getElementById("tzSelect").value;
+                                                    const message = document.getElementById("localizedMessage");
+                                                    const timeDisplay = document.getElementById("localizedTime");
+                                                    const messages = {
+                                                        "en-US": "Hello! Welcome to your dashboard.",
+                                                        "fr-FR": "Bonjour! Bienvenue sur votre tableau de bord.",
+                                                        "es-ES": "¡Hola! Bienvenido a tu panel.",
+                                                        "de-DE": "Hallo! Willkommen in deinem Dashboard.",
+                                                        "zh-CN": "你好！欢迎来到你的仪表板。"
+                                                    };
+                                                    message.textContent = messages[lang];
+                                                    const now = new Date().toLocaleString(lang, { timeZone: tz });
+                                                    timeDisplay.textContent = `🕒 Localized Time: ${now}`;
+                                                }
+                                            function loadTraining() {
+                                                const topic = document.getElementById("trainingSelect").value;
+                                                const area = document.getElementById("trainingArea");
+                                                const trainingContent = {
+                                                    faq: "❓ FAQs:\n- How do I escalate an issue?\n- How do I customize templates?\n- How do I enable push notifications?",
+                                                    tutorials: "📘 Tutorials:\n1. Setting up multi‑tenant dashboards\n2. Configuring retry & escalation policies\n3. Integrating plugins like Jira or Slack",
+                                                    simulations: "🎮 Guided Simulation:\nStep 1: Trigger a failure\nStep 2: Observe retry logic\nStep 3: Escalate to ServiceNow\nStep 4: Review analytics dashboard",
+                                                    bestPractices: "🌟 Best Practices:\n- Use batching to reduce costs\n- Enable encryption for all channels\n- Collect user feedback regularly\n- Monitor sustainability metrics"
+                                                };
+                                                area.textContent = trainingContent[topic];
+                                            }
+                                        let points = 120;
+                                        let badges = ["⭐ Feedback Champion"];
+                                        function earnPoints(action) {
+                                            const log = document.getElementById("gameLog");
+                                            const timestamp = new Date().toLocaleTimeString();
+                                            let earned = 0;
+                                            let newBadge = null;
+                                            if (action === "feedback") {
+                                                earned = 10;
+                                                if (!badges.includes("🎖️ Feedback Master")) {
+                                                    newBadge = "🎖️ Feedback Master";
+                                                }
+                                            } else if (action === "escalation") {
+                                                earned = 20;
+                                                if (!badges.includes("🚨 Crisis Handler")) {
+                                                    newBadge = "🚨 Crisis Handler";
+                                                }
+                                            } else if (action === "monitor") {
+                                                earned = 15;
+                                                if (!badges.includes("📡 Monitoring Pro")) {
+                                                    newBadge = "📡 Monitoring Pro";
+                                                }
+                                            }
+                                            points += earned;
+                                            document.getElementById("points").textContent = points;
+                                            if (newBadge) {
+                                                badges.push(newBadge);
+                                                document.getElementById("badges").textContent = badges.join(", ");
+                                                log.textContent = `${timestamp} | 🏆 Earned ${earned} points + New Badge: ${newBadge}`;
+                                            } else {
+                                                log.textContent = `${timestamp} | 🏆 Earned ${earned} points.`;
+                                            }
+                                        }
+                                    function submitFeedback() {
+                                        const rating = document.getElementById("feedbackRating").value;
+                                        const comment = document.getElementById("feedbackComment").value;
+                                        const timestamp = new Date().toLocaleTimeString();
+                                        const log = document.getElementById("feedbackLog");
+                                        log.textContent = `${timestamp} | 🗣️ Feedback received → Rating: ${rating}/5 | Comment: "${comment}"`;
+                                        // In a real system, this would send feedback to backend for analytics & ML insights
+                                    }
+                                function runSustainabilityAnalysis() {
+                                    const log = [];
+                                    // Simulated energy usage data
+                                    const usage = {
+                                        servers: 5,
+                                        avgPowerPerServer: 250, // watts
+                                        hoursActive: 24,
+                                        notificationsSent: 1200
+                                    };
+                                    const totalEnergy = usage.servers * usage.avgPowerPerServer * usage.hoursActive / 1000; // kWh
+                                    const carbonFactor = 0.4; // kg CO2 per kWh (example)
+                                    const carbonFootprint = totalEnergy * carbonFactor;
+                                    log.push(`⚡ Energy Consumption: ${totalEnergy.toFixed(2)} kWh/day`);
+                                    log.push(`🌍 Carbon Footprint: ${carbonFootprint.toFixed(2)} kg CO2/day`);
+                                    // Recommendations
+                                    if (usage.servers > 4) {
+                                        log.push("💡 Recommendation: Consolidate workloads to fewer servers or use cloud auto‑scaling.");
+                                    }
+                                    if (carbonFootprint > 3) {
+                                        log.push("🌱 Recommendation: Switch to renewable energy sources or green hosting providers.");
+                                    }
+                                    if (usage.notificationsSent > 1000) {
+                                        log.push("📉 Recommendation: Batch non‑critical notifications to reduce energy load.");
+                                    }
+                                    document.getElementById("sustainLog").textContent = log.join("\n");
+                                }
+                            function runCostAnalysis() {
+                                const log = [];
+                                // Simulated resource usage data
+                                const usage = {
+                                    notificationsSent: 1200,
+                                    retries: 150,
+                                    escalations: 20,
+                                    channels: ["Slack", "Teams", "Email", "SMS"]
+                                };
+                                // Cost assumptions (example values)
+                                const costPerNotification = 0.01; // $0.01 per notification
+                                const costPerRetry = 0.02;        // $0.02 per retry
+                                const costPerEscalation = 0.10;   // $0.10 per escalation
+                                const totalCost =
+                                    (usage.notificationsSent * costPerNotification) +
+                                    (usage.retries * costPerRetry) +
+                                    (usage.escalations * costPerEscalation);
+                                log.push(`📊 Total Notifications: ${usage.notificationsSent}`);
+                                log.push(`🔄 Retries: ${usage.retries}`);
+                                log.push(`🚨 Escalations: ${usage.escalations}`);
+                                log.push(`💰 Estimated Cost: $${totalCost.toFixed(2)}`);
+                                // Recommendations
+                                if (usage.retries > 100) {
+                                    log.push("🔧 Recommendation: Optimize retry logic to reduce costs.");
+                                }
+                                if (usage.channels.includes("SMS")) {
+                                    log.push("📉 Recommendation: SMS is expensive. Consider routing non-critical alerts to Slack/Email.");
+                                }
+                                if (totalCost > 50) {
+                                    log.push("💡 Recommendation: Enable batch notifications to lower per-message costs.");
+                                }
+                                document.getElementById("costLog").textContent = log.join("\n");
+                            }
+                        function runComplianceChecks() {
+                            const log = [];
+                            // Simulated compliance checks
+                            const iso27001 = true;
+                            const soc2 = true;
+                            const gdpr = false; // Example: GDPR not fully compliant
+                            if (iso27001) {
+                                log.push("✅ ISO 27001: Information security controls verified.");
+                            } else {
+                                log.push("❌ ISO 27001: Missing security documentation.");
+                            }
+                            if (soc2) {
+                                log.push("✅ SOC 2: Trust service criteria met (security, availability, confidentiality).");
+                            } else {
+                                log.push("❌ SOC 2: Audit required.");
+                            }
+                            if (gdpr) {
+                                log.push("✅ GDPR: Data protection and privacy compliance confirmed.");
+                            } else {
+                                log.push("⚠️ GDPR: Data retention policy incomplete. Recommend review.");
+                            }
+                            document.getElementById("complianceLog").textContent = log.join("\n");
+                        }
+                    function runSecurityChecks() {
+                        const log = [];
+                        // Simulated checks
+                        const encryptionEnabled = true;
+                        const roleValidated = true;
+                        const intrusionDetected = false;
+                        if (encryptionEnabled) {
+                            log.push("🔐 Encryption enforced: All notifications secured with AES‑256.");
+                        } else {
+                            log.push("⚠️ Encryption not enabled. Recommend enabling TLS + AES‑256.");
+                        }
+                        if (roleValidated) {
+                            log.push("👤 Role validation passed: RBAC permissions verified.");
+                        } else {
+                            log.push("🚫 Role validation failed. Unauthorized access attempt detected.");
+                        }
+                        if (intrusionDetected) {
+                            log.push("🚨 Intrusion detected! Alerting admins + locking system.");
+                        } else {
+                            log.push("✅ No intrusion detected. System secure.");
+                        }
+                        document.getElementById("securityLog").textContent = log.join("\n");
+                    }
+                function backupConfig() {
+                    const timestamp = new Date().toLocaleString();
+                    const log = document.getElementById("drLog");
+                    // Simulated backup
+                    log.textContent = `${timestamp} | 💾 Backup created: config_backup_${Date.now()}.json`;
+                }
+
+                function restoreCheckpoint() {
+                    const timestamp = new Date().toLocaleString();
+                    const log = document.getElementById("drLog");
+                    // Simulated restore
+                    log.textContent = `${timestamp} | ♻️ Restored system from last checkpoint. Notifications resumed.`;
+                }
+            async function triggerPushNotification() {
+                const log = document.getElementById("pushLog");
+                const timestamp = new Date().toLocaleTimeString();
+                // Simulated event (could be dynamic)
+                const event = {
+                    type: "failure",
+                    message: "Deployment D7 failed after 3 retries. Escalation triggered."
+                };
+                // Real backend call for push delivery
+                try {
+                    const res = await fetch('/api/send_push', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({message: event.message, type: event.type})
+                    });
+                    const data = await res.json();
+                    log.textContent = `${timestamp} | 📲 Push Notification Sent → ${event.message}`;
+                } catch (err) {
+                    log.textContent = `${timestamp} | ❌ Push Notification Error: ${err}`;
+                }
+            }
+        let mobileDarkMode = false;
+        function toggleMobileDarkMode() {
+          mobileDarkMode = !mobileDarkMode;
+          const app = document.getElementById('mobileApp');
+          if (mobileDarkMode) {
+            app.style.background = '#222';
+            app.style.color = '#eee';
+            app.style.boxShadow = '0 2px 8px #333';
+            document.getElementById('mobileLog').style.background = '#333';
+            document.getElementById('mobileLog').style.color = '#eee';
+          } else {
+            app.style.background = '#fff';
+            app.style.color = '#222';
+            app.style.boxShadow = '0 2px 8px #eee';
+            document.getElementById('mobileLog').style.background = '#f9f9f9';
+            document.getElementById('mobileLog').style.color = '#222';
+          }
+        }
+        function simulatePushAlert() {
+          const log = document.getElementById('mobileLog');
+          const timestamp = new Date().toLocaleTimeString();
+          log.textContent = `${timestamp} | 🔔 Push Alert: Critical escalation detected!`;
+        }
+        function startMobileVoiceQuery() {
+          const log = document.getElementById('mobileLog');
+          if (!('webkitSpeechRecognition' in window)) {
+            log.textContent = '❌ Voice recognition not supported on this device.';
+            return;
+          }
+          const recognition = new webkitSpeechRecognition();
+          recognition.lang = 'en-US';
+          recognition.interimResults = false;
+          recognition.maxAlternatives = 1;
+          recognition.start();
+          log.textContent = '🎤 Listening for query...';
+          recognition.onresult = async function(event) {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            log.textContent = `🗣️ Heard: "${transcript}"`;
+            if (transcript.includes('failures')) {
+              const res = await fetch('/api/audit_trail_filtered?type=failure');
+              const data = await res.json();
+              log.textContent += `\n💬 Query: "Show me failures" → ${data.length} failures found in last 100 events.`;
+            } else if (transcript.includes('status')) {
+              const res = await fetch('/api/notification_status');
+              const data = await res.json();
+              log.textContent += `\n📊 Delivered: ${data.delivered} | Pending: ${data.pending} | Failed: ${data.failed} | Last Delivery: ${data.last_delivery}`;
+            } else {
+              log.textContent += '\n🤔 Query not recognized.';
+            }
+          };
+          recognition.onerror = function(event) {
+            log.textContent = `⚠️ Error: ${event.error}`;
+          };
+        }
+        async function mobileAction(action) {
+                    const log = document.getElementById("mobileLog");
+                    const timestamp = new Date().toLocaleTimeString();
+                    const chartPanel = document.getElementById('mobileChartPanel');
+                    const chartCanvas = document.getElementById('mobileAnalyticsChart');
+                      let chartInstance = window.mobileAnalyticsChartInstance;
+                      const chartType = document.getElementById('mobileChartType') ? document.getElementById('mobileChartType').value : 'bar';
+                    try {
+                        if (action === "refresh") {
+                            log.textContent = `${timestamp} | 🔄 Refreshing dashboard...`;
+                            await mobileAction('analytics');
+                        } else if (action === "export") {
+                            log.textContent = `${timestamp} | 📤 Exporting analytics data...`;
+                            // Simulate export (could trigger download)
+                            log.textContent += `\n✅ Exported as CSV.`;
+                        } else if (action === "filterdate") {
+                            const date = document.getElementById('mobileDate').value;
+                            log.textContent = `${timestamp} | 📅 Filtering by date: ${date}`;
+                            // Simulate filter (could fetch filtered data)
+                            // ...
+                        }
+                        const role = document.getElementById('mobileRole').value;
+                        if (action === "status") {
+                            log.textContent = `${timestamp} | 📊 Loading status...`;
+                            const res = await fetch('/api/notification_status');
+                            const data = await res.json();
+                            log.textContent = `${timestamp} | 📊 Delivered: ${data.delivered} | Pending: ${data.pending} | Failed: ${data.failed} | Last Delivery: ${data.last_delivery}`;
+                        } else if (action === "query") {
+                            log.textContent = `${timestamp} | 💬 Loading query results...`;
+                            const filter = document.getElementById('mobileFilter').value.trim();
+                            const type = filter ? filter : 'failure';
+                            const res = await fetch(`/api/audit_trail_filtered?type=${type}`);
+                            const data = await res.json();
+                            log.textContent = `${timestamp} | 💬 Query: \"Show me ${type}\" → ${data.length} found in last 100 events.`;
+                        } else if (action === "monitor") {
+                            log.textContent = `${timestamp} | 📡 Starting live monitor...`;
+                            const res = await fetch('/api/feed');
+                            const data = await res.json();
+                            log.textContent = `${timestamp} | 📡 Monitoring: ${data.status ? data.status : 'Notifications flowing to Slack + Teams.'}`;
+                        } else if (action === "escalate") {
+                            if (role !== 'admin') {
+                                log.textContent = `${timestamp} | 🚫 Only admins can escalate issues.`;
+                                return;
+                            }
+                            log.textContent = `${timestamp} | 🚨 Escalating issue...`;
+                            const res = await fetch('/api/escalation_actions');
+                            const data = await res.json();
+                            if (data.actions && data.actions.length) {
+                                log.textContent = `${timestamp} | 🚨 Escalation triggered → ${data.actions[0].action}: ${data.actions[0].details}`;
+                            } else {
+                                log.textContent = `${timestamp} | 🚨 No escalation actions found.`;
+                            }
+                        } else if (action === "analytics") {
+                            log.textContent = `${timestamp} | 📈 Loading analytics...`;
+                            const res = await fetch('/api/audit_summary');
+                            const data = await res.json();
+                            log.textContent = `${timestamp} | 📈 Total Events: ${data.total_events} | Critical: ${data.critical} | Warnings: ${data.warnings} | Success: ${data.success}`;
+                            // Render chart
+                            if (chartInstance) chartInstance.destroy();
+                            let chartConfig = {};
+                            if (chartType === 'bar') {
+                                chartConfig = {
+                                    type: 'bar',
+                                    data: {
+                                        labels: ['Critical', 'Warnings', 'Success'],
+                                        datasets: [{
+                                            label: 'Event Counts',
+                                            data: [data.critical, data.warnings, data.success],
+                                            backgroundColor: ['#e74c3c','#f39c12','#2ecc71']
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: false,
+                                        plugins: { legend: { display: false } },
+                                        scales: { y: { beginAtZero: true } }
+                                    }
+                                };
+                            } else if (chartType === 'pie') {
+                                chartConfig = {
+                                    type: 'pie',
+                                    data: {
+                                        labels: ['Critical', 'Warnings', 'Success'],
+                                        datasets: [{
+                                            data: [data.critical, data.warnings, data.success],
+                                            backgroundColor: ['#e74c3c','#f39c12','#2ecc71']
+                                        }]
+                                    },
+                                    options: { responsive: false, plugins: { legend: { position: 'bottom' } } }
+                                };
+                            } else if (chartType === 'line') {
+                                chartConfig = {
+                                    type: 'line',
+                                    data: {
+                                        labels: ['Critical', 'Warnings', 'Success'],
+                                        datasets: [{
+                                            label: 'Event Counts',
+                                            data: [data.critical, data.warnings, data.success],
+                                            borderColor: '#3498db',
+                                            backgroundColor: 'rgba(52,152,219,0.2)',
+                                            fill: true
+                                        }]
+                                    },
+                                    options: { responsive: false, plugins: { legend: { position: 'top' } } }
+                                };
+                            }
+                            chartInstance = new Chart(chartCanvas.getContext('2d'), chartConfig);
+                            window.mobileAnalyticsChartInstance = chartInstance;
+                                // Real push notification registration (service worker + permission + backend subscription)
+                                const log = document.getElementById('mobileLog');
+                                if (!('serviceWorker' in navigator)) {
+                                    log.textContent = '❌ Service worker not supported.';
+                                    return;
+                                }
+                                navigator.serviceWorker.register('mobile-push-sw.js').then(function(reg) {
+                                    log.textContent = '🔔 Service worker registered.';
+                                    if ('Notification' in window) {
+                                        Notification.requestPermission().then(async function(permission) {
+                                            if (permission === 'granted') {
+                                                log.textContent += '\n✅ Push notifications enabled.';
+                                                // Subscribe to push service (simulate endpoint/token)
+                                                if ('PushManager' in window) {
+                                                    try {
+                                                        const sub = await reg.pushManager.subscribe({
+                                                            userVisibleOnly: true,
+                                                            applicationServerKey: 'BEl1dummypubkeyforlocaltest' // Replace with real VAPID key
+                                                        });
+                                                        // Send subscription to backend
+                                                        await fetch('/api/register_push', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify(sub)
+                                                        });
+                                                        log.textContent += '\n🔗 Registered with backend push service.';
+                                                    } catch (err) {
+                                                        log.textContent += '\n❌ Push subscription failed: ' + err;
+                                                    }
+                                                }
+                                            } else {
+                                                log.textContent += '\n⚠️ Push notifications denied.';
+                                            }
+                                        });
+                                    } else {
+                                        log.textContent += '\n❌ Notifications not supported.';
+                                    }
+                                }).catch(function(err) {
+                                    log.textContent = '❌ Service worker registration failed: ' + err;
+                                });
+                            }
+
+                            function clearMobileLog() {
+                                document.getElementById('mobileLog').textContent = 'Ready for mobile commands...';
+                            }
+                        } else if (action === "pushalert") {
+                            log.textContent = `${timestamp} | 🔔 Push Alert: New escalation event for Team A!`;
+                        } else if (action === "rbac") {
+                            log.textContent = `${timestamp} | 🔑 Role Selected: ${role}`;
+                            // Simulate permissions
+                            const permissions = {
+                                admin: ["define policies", "trigger escalations", "deploy to all channels"],
+                                dev: ["deploy to dev/staging channels", "view analytics"],
+                                qa: ["deploy to QA channels", "view analytics"],
+                                viewer: ["view analytics only"]
+                            };
+                            log.textContent += `\n📋 Permissions: ${permissions[role].join(", ")}`;
+                            if (role !== "admin") {
+                                log.textContent += "\n🚫 Restricted: Only admins can define governance policies or escalate failures.";
+                            }
+                            if (role === "viewer") {
+                                log.textContent += "\nℹ️ Viewer role has read-only access. No deployment allowed.";
+                            }
+                        } else if (action === "sendPush") {
+                            log.textContent = `${timestamp} | 🔔 Sending real push...`;
+                            const res = await fetch('/api/send_push', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({message: 'Real SOC Alert!'})
+                            });
+                            const data = await res.json();
+                            log.textContent += `\n✅ Real push sent: ${data.message}`;
+                        } else if (action === "showTypeBreakdown") {
+                            log.textContent = `${timestamp} | 📊 Loading event type breakdown...`;
+                            const res = await fetch('/api/audit_type_breakdown');
+                            const data = await res.json();
+                            renderTypeBreakdownChart(data);
+                            log.textContent += `\n✅ Type breakdown chart loaded.`;
+                        } else {
+                            log.textContent = `${timestamp} | 🤔 Unknown action.`;
+                        }
+                    } catch (err) {
+                        log.textContent = `${timestamp} | ❌ Error: ${err}`;
+                    }
+                }
+
+                function renderTypeBreakdownChart(data) {
+                    const chartCanvas = document.getElementById('typeBreakdownChart');
+                    chartCanvas.style.display = '';
+                    if (window.typeBreakdownChartInstance) window.typeBreakdownChartInstance.destroy();
+                    window.typeBreakdownChartInstance = new Chart(chartCanvas.getContext('2d'), {
+                        type: 'pie',
+                        data: {
+                            labels: data.types,
+                            datasets: [{
+                                data: data.counts,
+                                backgroundColor: ['#e74c3c','#f39c12','#2ecc71','#3498db','#9b59b6','#f1c40f']
+                            }]
+                        },
+                        options: {responsive: false, plugins: {legend: {position: 'bottom'}}}
+                    });
+                }
+
+                function mobileQuickFilter() {
+                    // Optionally trigger query on filter change
+                    // mobileAction('query');
+                }
+        </script>
+    </div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Authentication (simple demo)
+    function login() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        if(user === 'socadmin' && pass === 'secure2026') {
+            document.getElementById('authStatus').textContent = 'Authenticated';
+            document.getElementById('authStatus').style.color = 'green';
+        } else {
+            document.getElementById('authStatus').textContent = 'Invalid credentials';
+            document.getElementById('authStatus').style.color = 'red';
+        }
+    }
+    // Dark mode toggle
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+    // Collapsible sections
+    var coll = document.getElementsByClassName('collapsible');
+    for (let i = 0; i < coll.length; i++) {
+        coll[i].addEventListener('click', function() {
+            this.classList.toggle('active');
+            var content = this.nextElementSibling;
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        });
+    }
+    // Load artifact data (from JSON file or API)
+    let artifacts = [];
+    fetch('artifact_log.json')
+        .then(response => response.json())
+        .then(data => {
+            artifacts = data;
+            populateFilters();
+            renderTable();
+            renderSummaryCharts();
+            renderAnalytics();
+        });
+    function populateFilters() {
+        const typeSet = new Set();
+        const sourceSet = new Set();
+        artifacts.forEach(a => { typeSet.add(a.type); sourceSet.add(a.source); });
+        const typeFilter = document.getElementById('typeFilter');
+        typeSet.forEach(t => {
+            let opt = document.createElement('option');
+            opt.value = t; opt.textContent = t; typeFilter.appendChild(opt);
+        });
+        const sourceFilter = document.getElementById('sourceFilter');
+        sourceSet.forEach(s => {
+            let opt = document.createElement('option');
+            opt.value = s; opt.textContent = s; sourceFilter.appendChild(opt);
+        });
+    }
+    function renderTable() {
+        let typeVal = document.getElementById('typeFilter').value;
+        let sourceVal = document.getElementById('sourceFilter').value;
+        let searchVal = document.getElementById('searchBox').value.toLowerCase();
+        let filtered = artifacts.filter(a => {
+            return (typeVal === '' || a.type === typeVal) &&
+                   (sourceVal === '' || a.source === sourceVal) &&
+                   (a.artifact_id.toLowerCase().includes(searchVal) ||
+                    a.type.toLowerCase().includes(searchVal) ||
+                    a.source.toLowerCase().includes(searchVal) ||
+                    a.description.toLowerCase().includes(searchVal));
+        });
+        let html = '<table><tr><th>ID</th><th>Type</th><th>Timestamp</th><th>Source</th><th>Description</th></tr>';
+        filtered.forEach(a => {
+            html += `<tr onclick="showModal('${a.artifact_id}')"><td>${a.artifact_id}</td><td>${a.type}</td><td>${a.timestamp}</td><td>${a.source}</td><td>${a.description}</td></tr>`;
+        });
+        html += '</table>';
+        document.getElementById('artifactTable').innerHTML = html;
+    }
+    function showModal(id) {
+        let a = artifacts.find(x => x.artifact_id === id);
+        let html = `<h3>Artifact Details</h3><ul>`;
+        for(let k in a) html += `<li><b>${k}:</b> ${a[k]}</li>`;
+        html += '</ul>';
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('modal').style.display = 'block';
+    }
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+    function renderSummaryCharts() {
+        // Color map for types
+        const typeColors = { pcap: '#e74c3c', logfile: '#3498db', alert: '#2ecc71', email: '#9b59b6', default: '#f39c12' };
+        let typeCounts = {};
+        let sourceCounts = {};
+        artifacts.forEach(a => {
+            typeCounts[a.type] = (typeCounts[a.type] || 0) + 1;
+            sourceCounts[a.source] = (sourceCounts[a.source] || 0) + 1;
+        });
+        let html = '<h3>By Type</h3>';
+        for(let t in typeCounts) {
+            let color = typeColors[t] || typeColors.default;
+            let width = typeCounts[t] * 30;
+            html += `<div>${t}: <div class='bar-container'><div class='bar' style='width:${width}px; background:${color}'>${typeCounts[t]}</div></div></div>`;
+        }
+        html += '<h3>By Source</h4>';
+        for(let s in sourceCounts) {
+            let width = sourceCounts[s] * 30;
+            html += `<div>${s}: <div class='bar-container'><div class='bar' style='width:${width}px; background:#34495e'>${sourceCounts[s]}</div></div></div>`;
+        }
+        document.getElementById('summaryCharts').innerHTML = html;
+    }
+    function renderAnalytics() {
+        // Pie chart for type distribution
+        let typeCounts = {};
+        artifacts.forEach(a => { typeCounts[a.type] = (typeCounts[a.type] || 0) + 1; });
+        let labels = Object.keys(typeCounts);
+        let data = labels.map(l => typeCounts[l]);
+        let colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12','#34495e'];
+        document.getElementById('analyticsPanel').innerHTML = '<canvas id="typePie" width="300" height="300"></canvas><canvas id="trendLine" width="400" height="200"></canvas><canvas id="sourceBar" width="400" height="200"></canvas><div id="heatmapPanel"></div>';
+        let ctxPie = document.getElementById('typePie').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors }] },
+            options: { responsive: false, plugins: { legend: { position: 'bottom' } } }
+        });
+        // Trend line chart (by day)
+        let dateCounts = {};
+        artifacts.forEach(a => {
+            let d = a.timestamp.split('T')[0];
+            dateCounts[d] = (dateCounts[d] || 0) + 1;
+        });
+        let dateLabels = Object.keys(dateCounts).sort();
+        let dateData = dateLabels.map(l => dateCounts[l]);
+        let ctxLine = document.getElementById('trendLine').getContext('2d');
+        new Chart(ctxLine, {
+            type: 'line',
+            data: { labels: dateLabels, datasets: [{ label: 'Artifacts per Day', data: dateData, borderColor: '#3498db', fill: false }] },
+            options: { responsive: false, plugins: { legend: { position: 'top' } } }
+        });
+        // Bar chart for source distribution
+        let sourceCounts = {};
+        artifacts.forEach(a => { sourceCounts[a.source] = (sourceCounts[a.source] || 0) + 1; });
+        let sourceLabels = Object.keys(sourceCounts);
+        let sourceData = sourceLabels.map(l => sourceCounts[l]);
+        let ctxBar = document.getElementById('sourceBar').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: { labels: sourceLabels, datasets: [{ label: 'Artifacts by Source', data: sourceData, backgroundColor: '#2ecc71' }] },
+            options: { responsive: false, plugins: { legend: { position: 'top' } } }
+        });
+        // Heatmap placeholder (for future advanced analytics)
+        document.getElementById('heatmapPanel').innerHTML = '<b>Heatmap analytics coming soon...</b>';
+        // Advanced analytics: correlation scatter plot (type vs source count)
+        let typeSourceCounts = {};
+        artifacts.forEach(a => {
+            let key = a.type + '-' + a.source;
+            typeSourceCounts[key] = (typeSourceCounts[key] || 0) + 1;
+        });
+        let scatterData = [];
+        Object.keys(typeSourceCounts).forEach(k => {
+            let [type, source] = k.split('-');
+            scatterData.push({x: type, y: typeSourceCounts[k], source: source});
+        });
+        document.getElementById('analyticsPanel').innerHTML += '<canvas id="correlationScatter" width="400" height="200"></canvas><canvas id="timeHeatmap" width="400" height="200"></canvas>';
+        let ctxScatter = document.getElementById('correlationScatter').getContext('2d');
+        new Chart(ctxScatter, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Type-Source Correlation',
+                    data: scatterData.map(d => ({x: d.x.charCodeAt(0), y: d.y})),
+                    backgroundColor: '#f39c12'
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Type (char code)' } },
+                    y: { title: { display: true, text: 'Count' } }
+                },
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+        // Time-based heatmap placeholder
+        let ctxHeatmap = document.getElementById('timeHeatmap').getContext('2d');
+        ctxHeatmap.font = '16px Arial';
+        ctxHeatmap.fillText('Time-based heatmap analytics coming soon...', 10, 50);
+    }
+    // Azure AD OAuth Integration (MSAL.js)
+    // Add MSAL.js script
+    var msalScript = document.createElement('script');
+    msalScript.src = 'https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js';
+    document.head.appendChild(msalScript);
+    function azureLogin() {
+        const msalConfig = {
+            auth: {
+                clientId: 'YOUR_AZURE_AD_CLIENT_ID',
+                authority: 'https://login.microsoftonline.com/common',
+                redirectUri: window.location.href
+            }
+        };
+        const msalInstance = new window.msal.PublicClientApplication(msalConfig);
+        msalInstance.loginPopup({ scopes: ["user.read"] }).then(response => {
+            document.getElementById('authStatus').textContent = 'Azure AD Authenticated: ' + response.account.username;
+            document.getElementById('authStatus').style.color = 'green';
+        }).catch(e => {
+            document.getElementById('authStatus').textContent = 'Azure AD login failed.';
+            document.getElementById('authStatus').style.color = 'red';
+        });
+    }
+    // Add Azure AD login button
+    let azureBtn = document.createElement('button');
+    azureBtn.textContent = 'Login with Azure AD';
+    azureBtn.onclick = azureLogin;
+    document.querySelector('.auth').appendChild(azureBtn);
+
+    // Replace demo login button with OAuth
+    document.querySelector('.auth button').style.display = 'none';
+
+    // Generic OAuth2 Provider Integration (custom button)
+    function genericOAuthLogin() {
+        // Redirect to your OAuth2 provider's authorization endpoint
+        window.location.href = 'https://your-oauth-provider.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=' + encodeURIComponent(window.location.href) + '&response_type=token';
+    }
+    let genericBtn = document.createElement('button');
+    genericBtn.textContent = 'Login with Custom OAuth2';
+    genericBtn.onclick = genericOAuthLogin;
+    document.querySelector('.auth').appendChild(genericBtn);
+
+    // Real-time updates (polling every 60 seconds)
+    setInterval(() => {
+        fetch('artifact_log.json')
+            .then(response => response.json())
+            .then(data => {
+                artifacts = data;
+                renderTable();
+                renderSummaryCharts();
+                renderAnalytics();
+            });
+    }, 60000);
+
+    // Real-Time Integrity Monitor
+    let tamperCount = 0;
+    function runIntegrityMonitor() {
+        let trail = JSON.parse(localStorage.getItem("mergeAuditTrail") || "[]");
+        const statusArea = document.getElementById("integrityMonitorStatus");
+        statusArea.innerHTML = "<h5>Integrity Monitor Status</h5>";
+        if (trail.length === 0) {
+            statusArea.innerHTML += "<p>No audit entries to monitor.</p>";
+            return;
+        }
+        let tampered = false;
+        trail.forEach(entry => {
+            const recomputed = btoa(JSON.stringify({
+                action: entry.action,
+                branch: entry.branch,
+                details: entry.details,
+                timestamp: entry.timestamp
+            })).substring(0, 32);
+            if (recomputed !== entry.signature) {
+                tampered = true;
+                const div = document.createElement("div");
+                div.style.color = "red";
+                div.textContent = `[ALERT] Tampered entry detected at ${entry.timestamp} (Action: ${entry.action})`;
+                statusArea.appendChild(div);
+            }
+        });
+        if (!tampered) {
+            tamperCount = 0;
+            const div = document.createElement("div");
+            div.style.color = "green";
+            div.textContent = "All entries valid.";
+            statusArea.appendChild(div);
+        } else {
+            tamperCount++;
+            escalateTampering(tamperCount);
+        }
+        logMergeAudit("integrity-monitor", "system", tampered ? "Tampering detected" : "All entries valid");
+    }
+    function escalateTampering(count) {
+        const policies = JSON.parse(localStorage.getItem("escalationPolicies") || "[]");
+        const escalationArea = document.getElementById("escalationWorkflowStatus");
+        escalationArea.innerHTML = "";
+        const policy = policies.find(p => p.level === count);
+        if (policy) {
+            escalationArea.innerHTML = `<p style='color:${policy.color};'>${policy.message}</p>`;
+            alert(policy.alertText);
+            logMergeAudit("escalation-policy", "system", "Applied custom escalation policy: " + policy.message);
+            if (policy.action === "rollback") {
+                let snapshots = JSON.parse(localStorage.getItem("ruleSnapshots") || "[]");
+                if (snapshots.length > 0) {
+                    localStorage.setItem("activityThemeRules", snapshots[snapshots.length - 1].rules);
+                    logMergeAudit("escalation-action", "system", "Rollback applied due to custom policy");
+                }
+            }
+            if (policy.action === "lock") {
+                localStorage.setItem("systemLocked", "true");
+                logMergeAudit("escalation-action", "system", "System locked due to custom policy");
+            }
+        }
+    }
+    // Log monitoring events in audit trail
+    function logMergeAudit(eventType, user, details) {
+        let audit = JSON.parse(localStorage.getItem("mergeAuditTrail") || "[]");
+        audit.push({
+            timestamp: new Date().toISOString(),
+            event: eventType,
+            user: user,
+            details: details
+        });
+        localStorage.setItem("mergeAuditTrail", JSON.stringify(audit));
+        updateAuditTrail();
+    }
+    function updateAuditTrail() {
+        let audit = JSON.parse(localStorage.getItem("mergeAuditTrail") || "[]");
+        let html = "<b>Audit Trail:</b><ul>";
+        audit.slice(-20).reverse().forEach(a => {
+            html += `<li>[${a.timestamp}] <b>${a.event}</b> by ${a.user}: ${a.details}</li>`;
+        });
+        html += "</ul>";
+        document.getElementById("auditTrailPanel").innerHTML = html;
+    }
+    // Run monitor every 60 seconds
+    setInterval(runIntegrityMonitor, 60 * 1000);
+    // Initialize monitor on load
+    document.addEventListener("DOMContentLoaded", runIntegrityMonitor);
+    function saveEscalationPolicies() {
+        try {
+            const policies = JSON.parse(document.getElementById("policyEditor").value);
+            localStorage.setItem("escalationPolicies", JSON.stringify(policies));
+            document.getElementById("policyStatus").innerHTML = "Policies saved successfully.";
+            logMergeAudit("policy-save", "system", "Custom escalation policies updated");
+        } catch (err) {
+            alert("Invalid JSON format: " + err.message);
+        }
+    }
+    function loadEscalationPolicies() {
+        const policies = JSON.parse(localStorage.getItem("escalationPolicies") || "[]");
+        document.getElementById("policyEditor").value = JSON.stringify(policies, null, 2);
+        document.getElementById("policyStatus").innerHTML = "Policies loaded.";
+    }
+    function runPolicySimulation() {
+        const count = parseInt(document.getElementById("simulateTamperCount").value);
+        const policies = JSON.parse(localStorage.getItem("escalationPolicies") || "[]");
+        const output = document.getElementById("simulationOutput");
+        output.innerHTML = "<h5>Simulation Result</h5>";
+        const policy = policies.find(p => p.level === count);
+        if (policy) {
+            output.innerHTML += `
+                <p>Escalation Level: ${policy.level}</p>
+                <p>Message: ${policy.message}</p>
+                <p>Action: ${policy.action}</p>
+                <p>Alert Text: ${policy.alertText}</p>
+            `;
+        } else {
+            output.innerHTML += "<p>No policy defined for this tampering count.</p>";
+        }
+    }
+    function toggleAdaptiveMode() {
+        const enabled = document.getElementById("adaptiveToggle").checked;
+        localStorage.setItem("adaptiveModeEnabled", enabled);
+        alert("Adaptive Policy Engine " + (enabled ? "enabled" : "disabled"));
+        logMergeAudit("adaptive-toggle", "system", "Adaptive mode set to " + enabled);
+    }
+    function runAdaptiveEngine(riskLevel) {
+        if (localStorage.getItem("adaptiveModeEnabled") !== "true") return;
+        let policies = JSON.parse(localStorage.getItem("escalationPolicies") || "[]");
+        const status = document.getElementById("adaptiveStatus");
+        if (riskLevel === "Low") {
+            status.innerHTML = "<p style='color:green;'>Adaptive Engine: No changes needed.</p>";
+        } else if (riskLevel === "Medium") {
+            policies.forEach(p => { if (p.level === 2) p.message = "Escalate earlier due to medium risk"; });
+            status.innerHTML = "<p style='color:orange;'>Adaptive Engine: Thresholds tightened.</p>";
+            logMergeAudit("adaptive-adjust", "system", "Thresholds tightened for medium risk");
+        } else if (riskLevel === "High") {
+            policies.push({
+                level: 4,
+                message: "Critical auto-lockdown due to high risk",
+                action: "lock",
+                alertText: "System locked automatically due to high tampering risk",
+                color: "darkred"
+            });
+            status.innerHTML = "<p style='color:red;'>Adaptive Engine: New escalation level added.</p>";
+            logMergeAudit("adaptive-adjust", "system", "New escalation level added for high risk");
+        }
+        localStorage.setItem("escalationPolicies", JSON.stringify(policies));
+    }
+    function logMLInsight(predictedRisk, actualLevel) {
+        let insights = JSON.parse(localStorage.getItem("mlInsights") || "[]");
+        insights.push({
+            predicted: predictedRisk,
+            actual: actualLevel,
+            timestamp: new Date().toLocaleString()
+        });
+        localStorage.setItem("mlInsights", JSON.stringify(insights));
+        renderMLInsightsChart();
+    }
+    function renderMLInsightsChart() {
+        let insights = JSON.parse(localStorage.getItem("mlInsights") || "[]");
+        const ctx = document.getElementById("mlInsightsChart").getContext("2d");
+        const labels = insights.map(i => i.timestamp);
+        const predictedData = insights.map(i => i.predicted);
+        const actualData = insights.map(i => i.actual);
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Predicted Risk Level',
+                        data: predictedData,
+                        borderColor: 'blue',
+                        fill: false
+                    },
+                    {
+                        label: 'Actual Escalation Level',
+                        data: actualData,
+                        borderColor: 'red',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'ML Predictions vs Actual Events' }
+                }
+            }
+        });
+        // Accuracy calculation
+        let correct = insights.filter(i => i.predicted === i.actual).length;
+        let accuracy = insights.length > 0 ? (correct / insights.length * 100).toFixed(2) : 0;
+        document.getElementById("mlAccuracy").innerHTML = "<p>Prediction Accuracy: " + accuracy + "%</p>";
+    }
+    function submitFeedback() {
+        const timestamp = document.getElementById("feedbackTimestamp").value;
+        const correctRisk = document.getElementById("feedbackRisk").value;
+        let insights = JSON.parse(localStorage.getItem("mlInsights") || "[]");
+        let feedback = JSON.parse(localStorage.getItem("mlFeedback") || "[]");
+        const entry = insights.find(i => i.timestamp === timestamp);
+        if (!entry) {
+            alert("No prediction entry found for that timestamp.");
+            return;
+        }
+        feedback.push({
+            timestamp,
+            predicted: entry.predicted,
+            actual: entry.actual,
+            corrected: correctRisk
+        });
+        localStorage.setItem("mlFeedback", JSON.stringify(feedback));
+        document.getElementById("feedbackStatus").innerHTML = "<p>Feedback submitted successfully.</p>";
+        logMergeAudit("ml-feedback", "system", "Feedback submitted for timestamp " + timestamp);
+        if (localStorage.getItem("continuousLearningEnabled") === "true") {
+            retrainMLModel(feedback);
+            logMergeAudit("continuous-retrain", "system", "Continuous retrain triggered for timestamp " + timestamp);
+        }
+        updateMLAccuracy();
+    }
+    function retrainMLModel(feedback) {
+        if (feedback.length === 0) return;
+        let riskMap = { Low: 1, Medium: 2, High: 3 };
+        let total = 0;
+        feedback.forEach(f => { total += riskMap[f.corrected]; });
+        let avg = total / feedback.length;
+        window.mlModel = { avgCounts: avg };
+        document.getElementById("mlOutput").innerHTML = "<p>Model retrained with feedback. New avg risk score: " + avg.toFixed(2) + "</p>";
+        logMergeAudit("ml-retrain", "system", "Model retrained with feedback corrections");
+    }
+    function toggleContinuousLearning() {
+        const enabled = document.getElementById("continuousToggle").checked;
+        localStorage.setItem("continuousLearningEnabled", enabled);
+        document.getElementById("continuousStatus").innerHTML = "Continuous Learning " + (enabled ? "enabled" : "disabled");
+        logMergeAudit("continuous-toggle", "system", "Continuous learning set to " + enabled);
+    }
+    function updateMLAccuracy() {
+        let feedback = JSON.parse(localStorage.getItem("mlFeedback") || "[]");
+        let insights = JSON.parse(localStorage.getItem("mlInsights") || "[]");
+        let correct = 0, total = 0;
+        feedback.forEach(f => {
+            const entry = insights.find(i => i.timestamp === f.timestamp);
+            if (entry && f.corrected === entry.predicted) correct++;
+            total++;
+        });
+        let accuracy = total > 0 ? (correct / total * 100).toFixed(2) : "0.00";
+        document.getElementById("mlAccuracy").innerHTML = `<b>Live Accuracy:</b> ${accuracy}%`;
+    }
+    function runSelfHealing() {
+        // Simulated predictive metrics
+        const metrics = {
+            successRate: 68,   // declining
+            retries: 15,       // rising
+            escalations: 6     // rising
+        };
+        const log = [];
+        // Self‑healing logic
+        if (metrics.successRate < 75) {
+            log.push("⚙️ Auto‑Adjustment: Routing critical notifications to Admins + Slack first.");
+        }
+        if (metrics.retries > 10) {
+            log.push("🔄 Auto‑Adjustment: Increasing retry limit from 3 → 5 attempts.");
+            log.push("⏱️ Auto‑Adjustment: Adding 10s delay between retries to reduce load.");
+        }
+        if (metrics.escalations > 5) {
+            log.push("🚨 Auto‑Escalation: Creating automated ServiceNow ticket for admin review.");
+        }
+        if (log.length === 0) {
+            log.push("✅ System stable. No self‑healing adjustments required.");
+        }
+        document.getElementById("healingLog").textContent = log.join("\n");
+    }
+    function applyPolicies() {
+        const rulesText = document.getElementById("policyRules").value;
+        const rules = rulesText.split("\n").map(r => r.trim()).filter(r => r);
+        const config = JSON.parse(document.getElementById("jsonOutput")?.textContent || "{}");
+        if (!config.status) {
+            alert("No notification config available. Please generate or load one first.");
+            return;
+        }
+        const log = [];
+        rules.forEach(rule => {
+            if (rule.includes("failures must escalate within 2 retries") && config.status === "failure") {
+                log.push("🚨 Policy Enforcement: Failure detected → escalate after 2 retries.");
+            }
+            if (rule.includes("warnings only go to QA channels") && config.status === "warning") {
+                log.push("⚠️ Policy Enforcement: Routing warning notification only to QA channels.");
+            }
+            if (rule.includes("success notifications skip admin channels") && config.status === "success") {
+                log.push("✅ Policy Enforcement: Success notification routed to secondary channels only.");
+            }
+        });
+        if (log.length === 0) {
+            log.push("📋 No applicable policies triggered for this notification.");
+        }
+        document.getElementById("policyLog").textContent = log.join("\n");
+    }
+    function checkAccess() {
+        const role = document.getElementById("userRole").value;
+        const log = [];
+        // Define permissions
+        const permissions = {
+            admin: ["define policies", "trigger escalations", "deploy to all channels"],
+            dev: ["deploy to dev/staging channels", "view analytics"],
+            qa: ["deploy to QA channels", "view analytics"],
+            viewer: ["view analytics only"]
+        };
+        log.push(`🔑 Role Selected: ${role}`);
+        log.push(`📋 Permissions: ${permissions[role].join(", ")}`);
+        // Enforcement examples
+        if (role !== "admin") {
+            log.push("🚫 Restricted: Only admins can define governance policies or escalate failures.");
+        }
+        if (role === "viewer") {
+            log.push("ℹ️ Viewer role has read‑only access. No deployment allowed.");
+        }
+        document.getElementById("rbacLog").textContent = log.join("\n");
+    }
+    function logAction(actionType) {
+      const role = document.getElementById("userRole") ? document.getElementById("userRole").value : "unknown";
+      const timestamp = new Date().toISOString();
+      const entry = {
+        action: actionType,
+        role: role,
+        timestamp: timestamp
+      };
+      // Retrieve existing logs
+      let logs = JSON.parse(localStorage.getItem("auditLogs") || "[]");
+      logs.push(entry);
+      localStorage.setItem("auditLogs", JSON.stringify(logs));
+      displayAuditLogs();
+    }
+    function displayAuditLogs() {
+      const logs = JSON.parse(localStorage.getItem("auditLogs") || "[]");
+      const formatted = logs.map(log => `${log.timestamp} | 👤 Role: ${log.role} | 📌 Action: ${log.action}`);
+      document.getElementById("auditLog").textContent = formatted.join("\n");
+    }
+    // Initialize display on page load
+    document.addEventListener("DOMContentLoaded", displayAuditLogs);
+    document.addEventListener("DOMContentLoaded", renderMLInsightsChart);
+    function simulateLiveEvents() {
+      const feed = document.getElementById("liveFeed");
+      feed.innerHTML = "<strong>Live Feed:</strong><br>";
+      const events = [
+        "📤 Notification deployed to Slack",
+        "✅ Delivery confirmed on Teams",
+        "⚠️ Warning routed to QA channels",
+        "🔄 Retry triggered for Discord",
+        "🚨 Escalation enforced by policy"
+      ];
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < events.length) {
+          const timestamp = new Date().toLocaleTimeString();
+          feed.innerHTML += `${timestamp} | ${events[i]}<br>`;
+          i++;
+        } else {
+          clearInterval(interval);
+          feed.innerHTML += "<em>Monitoring session ended.</em>";
+        }
+      }, 2000); // new event every 2 seconds
+    }
+    async function executeBlockUI() {
+        const domain = document.getElementById('current-incident-url').innerText;
+        const response = await fetch('/api/block', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain: domain })
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+            alert("Domain Blocked: " + result.message);
+        }
+    }
+    function downloadReport() {
+        window.location.href = '/api/report';
+    }
+    // Simulate live MFA interception count
+    function updateMfaCount() {
+        // Simulate fetching count from backend
+        const count = Math.floor(Math.random() * 20) + 1;
+        document.getElementById('mfa-count').innerText = count;
+    }
+    setInterval(updateMfaCount, 5000); // update every 5 seconds
+    function switchTenant() {
+      const tenant = document.getElementById("tenantSelect").value;
+      const dashboard = document.getElementById("tenantDashboard");
+      const tenantConfigs = {
+        teamA: "Dashboard for Team A",
+        teamB: "Dashboard for Team B",
+        projectX: "Dashboard for Project X",
+        projectY: "Dashboard for Project Y"
+      };
+      dashboard.innerHTML = `<h4>${tenantConfigs[tenant]}</h4>
+        <p>Policies, analytics, monitoring, and escalations are isolated here.</p>`;
+    }
+    function applyBranding() {
+      const tenant = document.getElementById("tenantBrandSelect").value;
+      const title = document.getElementById("brandTitle");
+      const logo = document.getElementById("brandLogo");
+      const area = document.getElementById("brandingArea");
+      const brandingConfigs = {
+        teamA: {
+          title: "Team A Dashboard",
+          logo: "https://via.placeholder.com/100x50/4CAF50/FFFFFF?text=Team+A",
+          color: "#E8F5E9"
+        },
+        teamB: {
+          title: "Team B Dashboard",
+          logo: "https://via.placeholder.com/100x50/2196F3/FFFFFF?text=Team+B",
+          color: "#E3F2FD"
+        },
+        projectX: {
+          title: "Project X Dashboard",
+          logo: "https://via.placeholder.com/100x50/FFC107/000000?text=Project+X",
+          color: "#FFF8E1"
+        },
+        projectY: {
+          title: "Project Y Dashboard",
+          logo: "https://via.placeholder.com/100x50/9C27B0/FFFFFF?text=Project+Y",
+          color: "#F3E5F5"
+        }
+      };
+      const config = brandingConfigs[tenant];
+      title.textContent = config.title;
+      logo.src = config.logo;
+      area.style.backgroundColor = config.color;
+    }
+    function loadPlugin() {
+      const plugin = document.getElementById("pluginSelect").value;
+      const area = document.getElementById("pluginArea");
+      const pluginConfigs = {
+        jira: {
+          title: "Jira Integration",
+          output: "📋 Created Jira ticket: DEPLOY‑1234"
+        },
+        servicenow: {
+          title: "ServiceNow Integration",
+          output: "🚨 ServiceNow incident logged: INC‑5678"
+        },
+        slackbot: {
+          title: "Slack Bot Integration",
+          output: "💬 Slack bot posted deployment status to #dev‑ops"
+        },
+        zendesk: {
+          title: "Zendesk Integration",
+          output: "🎫 Zendesk support ticket opened: TKT‑9012"
+        }
+      };
+      const config = pluginConfigs[plugin];
+      area.innerHTML = `<h4>${config.title}</h4><p>${config.output}</p>`;
+    }
+    function runMLInsights() {
+      // Simulated historical dataset
+      const history = {
+        successRates: [90, 85, 82, 78, 75, 70],
+        retries: [5, 6, 8, 10, 12, 14],
+        escalations: [1, 2, 3, 4, 5, 6]
+      };
+      const log = [];
+      // Simple ML-like heuristic analysis
+      const avgSuccess = history.successRates.reduce((a,b)=>a+b,0)/history.successRates.length;
+      const avgRetries = history.retries.reduce((a,b)=>a+b,0)/history.retries.length;
+      const avgEscalations = history.escalations.reduce((a,b)=>a+b,0)/history.escalations.length;
+      if (avgSuccess < 80) {
+        log.push("📊 Insight: Success rates trending low. Recommend routing critical notifications to Admin + Slack first.");
+      }
+      if (avgRetries > 10) {
+        log.push("🔄 Insight: Retry counts are high. Recommend reducing batch size and adding longer delays between retries.");
+      }
+      if (avgEscalations > 4) {
+        log.push("🚨 Insight: Escalations frequent. Recommend lowering escalation threshold to 2 retries.");
+      }
+      if (log.length === 0) {
+        log.push("✅ ML Insights: System performance stable. No adjustments recommended.");
+      }
+      document.getElementById("mlLog").textContent = log.join("\n");
+    }
+    function processNLQuery() {
+      const query = document.getElementById("nlQuery").value.toLowerCase();
+      const log = [];
+      // Simulated dataset
+      const deployments = [
+        {id:"D1", status:"success", retries:2, escalations:0},
+        {id:"D2", status:"failure", retries:5, escalations:1},
+        {id:"D3", status:"warning", retries:3, escalations:0},
+        {id:"D4", status:"failure", retries:6, escalations:2},
+        {id:"D5", status:"success", retries:1, escalations:0}
+      ];
+      if (query.includes("failures")) {
+        const fails = deployments.filter(d => d.status === "failure");
+        log.push("❌ Failures found:");
+        fails.forEach(d => log.push(`Deployment ${d.id} | Retries: ${d.retries} | Escalations: ${d.escalations}`));
+      } else if (query.includes("escalations")) {
+        const esc = deployments.filter(d => d.escalations > 0);
+        log.push("🚨 Escalations triggered:");
+        esc.forEach(d => log.push(`Deployment ${d.id} | Escalations: ${d.escalations}`));
+      } else if (query.includes("retries")) {
+        const avgRetries = deployments.reduce((a,b)=>a+b.retries,0)/deployments.length;
+        log.push(`🔄 Average retries across deployments: ${avgRetries.toFixed(1)}`);
+      } else {
+        log.push("🤔 Query not recognized. Try asking about failures, retries, or escalations.");
+      }
+      document.getElementById("nlLog").textContent = log.join("\n");
+    }
+    function startVoiceCommand() {
+            const log = document.getElementById("voiceLog");
+            if (!('webkitSpeechRecognition' in window)) {
+                log.textContent = "❌ Voice recognition not supported in this browser.";
+                return;
+            }
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            recognition.start();
+            log.textContent = "🎙️ Listening...";
+            recognition.onresult = async function(event) {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                log.textContent = `🗣️ Heard: "${transcript}"`;
+                // Backend API integration for actions
+                if (transcript.includes("threat intelligence")) {
+                    log.textContent += "\n🛡️ Fetching threat intelligence...";
+                    try {
+                        const res = await fetch('/api/threat_intel');
+                        const data = await res.json();
+                        log.textContent += data.intel.map(i => `- **${i.threat}** (${i.severity})\n  - Indicator: ${i.indicator}\n  - Action: ${i.action}`).join("\n");
+                    } catch (err) { log.textContent += "\nError fetching threat intelligence."; }
+                } else if (transcript.includes("open tickets")) {
+                    log.textContent += "\n🎫 Fetching open tickets...";
+                    try {
+                        const res = await fetch('/api/open_tickets');
+                        const data = await res.json();
+                        log.textContent += data.tickets.map(t => `- **${t.id}** (${t.type})\n  - Status: ${t.status}\n  - Summary: ${t.summary}`).join("\n");
+                    } catch (err) { log.textContent += "\nError fetching open tickets."; }
+                } else if (transcript.includes("scheduled maintenance")) {
+                    log.textContent += "\n🛠️ Fetching scheduled maintenance...";
+                    try {
+                            // Fetch event breakdown and daily trend
+                            const res = await fetch('/api/audit_summary');
+                            const data = await res.json();
+                            const trendRes = await fetch('/api/audit_trend');
+                            const trend = await trendRes.json();
+                            log.textContent = `${timestamp} | 📈 Total Events: ${data.total_events} | Critical: ${data.critical} | Warnings: ${data.warnings} | Success: ${data.success}`;
+                            log.textContent += `\n📊 Daily Trend: ${trend.dates.map((d,i)=>d+': '+trend.counts[i]).join(', ')}`;
+                            // Render chart
+                            if (chartInstance) chartInstance.destroy();
+                            let chartConfig = {};
+                            if (chartType === 'bar') {
+                                chartConfig = {
+                                    type: 'bar',
+                                    data: {
+                                        labels: ['Critical', 'Warnings', 'Success'],
+                                        datasets: [{
+                                            label: 'Event Counts',
+                                            data: [data.critical, data.warnings, data.success],
+                                            backgroundColor: ['#e74c3c','#f39c12','#2ecc71']
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: false,
+                                        plugins: { legend: { display: false } },
+                                        scales: { y: { beginAtZero: true } }
+                                    }
+                                };
+                            } else if (chartType === 'pie') {
+                                chartConfig = {
+                                    type: 'pie',
+                                    data: {
+                                        labels: ['Critical', 'Warnings', 'Success'],
+                                        datasets: [{
+                                            data: [data.critical, data.warnings, data.success],
+                                            backgroundColor: ['#e74c3c','#f39c12','#2ecc71']
+                                        }]
+                                    },
+                                    options: { responsive: false, plugins: { legend: { position: 'bottom' } } }
+                                };
+                            } else if (chartType === 'line') {
+                                chartConfig = {
+                                    type: 'line',
+                                    data: {
+                                        labels: trend.dates,
+                                        datasets: [{
+                                            label: 'Events per Day',
+                                            data: trend.counts,
+                                            borderColor: '#3498db',
+                                            backgroundColor: 'rgba(52,152,219,0.2)',
+                                            fill: true
+                                        }]
+                                    },
+                                    options: { responsive: false, plugins: { legend: { position: 'top' } } }
+                                };
+                            }
+                            chartInstance = new Chart(chartCanvas.getContext('2d'), chartConfig);
+                            window.mobileAnalyticsChartInstance = chartInstance;
+                    try {
+                        const res = await fetch('/api/escalation_policy_details');
+                        const data = await res.json();
+                        log.textContent += data.policies.map(p => `- **Level ${p.level}**: ${p.action} (Threshold: ${p.threshold}) - ${p.message}`).join("\n");
+                    } catch (err) { log.textContent += "\nError fetching escalation policy details."; }
+                }
+                // Existing commands
+                else if (transcript.includes("system health")) {
+                    log.textContent += "\n🩺 Fetching system health...";
+                    try {
+                        const res = await fetch('/api/system_health');
+                        const data = await res.json();
+                        log.textContent += `\nStatus: ${data.status}\nUptime: ${data.uptime}\nLast Check: ${data.last_check}\nAlerts: ${data.alerts}`;
+                    } catch (err) { log.textContent += "\nError fetching system health."; }
+                } else if (transcript.includes("user stats")) {
+                    log.textContent += "\n👥 Fetching user stats...";
+                    try {
+                        const res = await fetch('/api/user_stats');
+                        const data = await res.json();
+                        log.textContent += `\nActive Users: ${data.active_users}\nAdmins: ${data.admins}\nLast Login: ${data.last_login}\nRoles: " + JSON.stringify(data.roles)`;
+                    } catch (err) { log.textContent += "\nError fetching user stats."; }
+                } else if (transcript.includes("escalation summary")) {
+                    log.textContent += "\n🚨 Fetching escalation summary...";
+                    try {
+                        const res = await fetch('/api/escalation_summary');
+                        const data = await res.json();
+                        log.textContent += `\nTotal Escalations: ${data.count}`;
+                        if (data.escalations && data.escalations.length) {
+                            log.textContent += "\n" + data.escalations.map(e => `[${e.timestamp}] ${e.event}: ${e.details || ''}`).join("\n");
+                        }
+                    } catch (err) { log.textContent += "\nError fetching escalation summary."; }
+                } else if (transcript.includes("retry summary")) {
+                    log.textContent += "\n🔄 Fetching retry summary...";
+                    try {
+                        const res = await fetch('/api/retry_summary');
+                        const data = await res.json();
+                        log.textContent += `\nTotal Retries: ${data.count}`;
+                        if (data.retries && data.retries.length) {
+                            log.textContent += "\n" + data.retries.map(e => `[${e.timestamp}] ${e.event}: ${e.details || ''}`).join("\n");
+                        }
+                    } catch (err) { log.textContent += "\nError fetching retry summary."; }
+                } else if (transcript.includes("ml prediction summary")) {
+                    log.textContent += "\n📊 Fetching ML prediction summary...";
+                    try {
+                        const res = await fetch('/api/ml_prediction_summary');
+                        const data = await res.json();
+                        log.textContent += `\nAccuracy: ${data.accuracy}%\nPredictions:\n` + data.predictions.map(p => `[${p.timestamp}] Predicted: ${p.predicted}, Actual: ${p.actual}`).join("\n");
+                    } catch (err) { log.textContent += "\nError fetching ML prediction summary."; }
+                } else if (transcript.includes("notification status")) {
+                    log.textContent += "\n📬 Fetching notification status...";
+                    try {
+                        const res = await fetch('/api/notification_status');
+                        const data = await res.json();
+                        log.textContent += `\nDelivered: ${data.delivered}\nPending: ${data.pending}\nFailed: ${data.failed}\nLast Delivery: ${data.last_delivery}`;
+                    } catch (err) { log.textContent += "\nError fetching notification status."; }
+                } else if (transcript.includes("filtered audit")) {
+                    log.textContent += "\n📋 Fetching filtered audit trail...";
+                    try {
+                        const type = prompt('Enter event type to filter (e.g., escalation, failure, retry):');
+                        const res = await fetch(`/api/audit_trail_filtered?type=${type}`);
+                        const data = await res.json();
+                        log.textContent += data.length ? ("\n" + data.map(e => `[${e.timestamp}] ${e.event}: ${e.details || ''}`).join("\n")) : "\nNo events found for type '" + type + "'.";
+                    } catch (err) { log.textContent += "\nError fetching filtered audit trail."; }
+                }
+                // Existing commands
+                else if (transcript.includes("escalations")) {
+                    log.textContent += "\n🚨 Fetching escalations triggered today...";
+                    try {
+                        const res = await fetch('/api/audit_trail');
+                        const data = await res.json();
+                        const esc = data.filter(e => e.event && e.event.toLowerCase().includes('escalation'));
+                        log.textContent += esc.length ? ("\n" + esc.map(e => `[${e.timestamp}] ${e.details || e.event}`).join("\n")) : "\nNo escalations found.";
+                    } catch (err) { log.textContent += "\nError fetching escalations."; }
+                } else if (transcript.includes("failures")) {
+                    log.textContent += "\n❌ Fetching recent failures...";
+                    try {
+                        const res = await fetch('/api/audit_trail');
+                        const data = await res.json();
+                        const fails = data.filter(e => e.event && e.event.toLowerCase().includes('failure'));
+                        log.textContent += fails.length ? ("\n" + fails.map(e => `[${e.timestamp}] ${e.details || e.event}`).join("\n")) : "\nNo failures found.";
+                    } catch (err) { log.textContent += "\nError fetching failures."; }
+                } else if (transcript.includes("retries")) {
+                    log.textContent += "\n🔄 Fetching retry statistics...";
+                    try {
+                        const res = await fetch('/api/audit_trail');
+                        const data = await res.json();
+                        const retries = data.filter(e => e.event && e.event.toLowerCase().includes('retry'));
+                        log.textContent += retries.length ? ("\n" + retries.map(e => `[${e.timestamp}] ${e.details || e.event}`).join("\n")) : "\nNo retries found.";
+                    } catch (err) { log.textContent += "\nError fetching retries."; }
+                } else if (transcript.includes("audit")) {
+                    log.textContent += "\n📋 Fetching audit trail...";
+                    try {
+                        const res = await fetch('/api/audit_trail');
+                        const data = await res.json();
+                        log.textContent += data.length ? ("\n" + data.map(e => `[${e.timestamp}] ${e.event}: ${e.details || ''}`).join("\n")) : "\nNo audit events found.";
+                    } catch (err) { log.textContent += "\nError fetching audit trail."; }
+                } else if (transcript.includes("ml insights")) {
+                    log.textContent += "\n📊 Fetching ML insights...";
+                    try {
+                        const res = await fetch('/api/insights');
+                        const data = await res.json();
+                        log.textContent += JSON.stringify(data, null, 2);
+                    } catch (err) { log.textContent += "\nError fetching ML insights."; }
+                } else if (transcript.includes("block domain")) {
+                    log.textContent += "\n🛡️ Executing domain block...";
+                    try {
+                        const domain = document.getElementById('current-incident-url').innerText;
+                        const res = await fetch('/api/block', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ domain })
+                        });
+                        const result = await res.json();
+                        log.textContent += result.status === "success" ? ("\nDomain Blocked: " + result.message) : "\nBlock failed.";
+                    } catch (err) { log.textContent += "\nError blocking domain."; }
+                } else if (transcript.includes("download report")) {
+                    log.textContent += "\n📄 Downloading audit report...";
+                    window.location.href = '/api/report';
+                } else {
+                    log.textContent += "\n🤔 Command not recognized. Try saying 'system health', 'user stats', 'escalation summary', 'retry summary', 'ml prediction summary', 'notification status', 'filtered audit', 'escalations', 'failures', 'retries', 'audit', 'ml insights', 'block domain', or 'download report'.";
+                }
+            };
+            recognition.onerror = function(event) {
+                log.textContent = `⚠️ Error: ${event.error}`;
+            };
+        }
+    </script>
+</body>
+</html>

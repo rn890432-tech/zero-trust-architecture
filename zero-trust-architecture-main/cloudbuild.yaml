@@ -1,0 +1,9 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build','-t','gcr.io/$PROJECT_ID/mission-control','.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push','gcr.io/$PROJECT_ID/mission-control']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['run','deploy','mission-control',
+         '--image','gcr.io/$PROJECT_ID/mission-control',
+         '--platform','managed','--region','us-central1']

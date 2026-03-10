@@ -1,0 +1,45 @@
+# CI/CD pipeline for new SOC microservices
+name: soc-microservices-pipeline
+on:
+  push:
+    paths:
+      - 'soc_dashboard/backend/**'
+      - 'soc_dashboard/frontend/**'
+      - 'infrastructure/k8s_manifests_soc.yaml'
+      - 'infrastructure/ci_cd_pipeline_soc.yaml'
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Build backend microservices
+        run: |
+          cd soc_dashboard/backend
+          for d in threat_intel attack_graph autonomous_defense dark_web_hunting threat_actor_attribution threat_hunting_ai; do
+            docker build -t $d:latest $d
+          done
+      - name: Build frontend
+        run: |
+          cd soc_dashboard/frontend
+          npm install
+          npm run build
+      - name: Lint and security scan
+        run: |
+          pip install bandit
+          bandit -r soc_dashboard/backend || true
+      - name: Run backend tests
+        run: |
+          python -m unittest discover -s test
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f ../../infrastructure/k8s_manifests_soc.yaml
+      - name: Health check endpoints
+        run: |
+          for port in 5001 5002 5003 5004 5005 5006; do
+            curl --fail http://localhost:$port/ || exit 1
+          done

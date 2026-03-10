@@ -1,0 +1,4 @@
+apiVersion: v2
+name: resilient-messaging-platform
+version: 0.1.0
+description: Helm chart for resilient messaging platform

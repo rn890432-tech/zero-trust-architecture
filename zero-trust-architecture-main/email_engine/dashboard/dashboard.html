@@ -1,0 +1,1424 @@
+                                <!-- Executive Metrics Panel & Controls -->
+                                <div class="demo" style="width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);text-align:center;margin-bottom:32px;">
+                                    <h2 style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:32px;color:#0A2342;margin-bottom:20px;">Enhanced Dashboard: Streamlined, Accessible, Ready for Leadership</h2>
+                                    <button class="button" aria-label="Open executive metrics dashboard" style="font-family:'Roboto',sans-serif;font-weight:500;font-size:20px;color:#fff;background-color:#1E3A8A;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;margin:0 auto;display:block;">View Executive Metrics</button>
+                                    <div class="tagline" style="font-style:italic;font-size:16px;color:#6B7280;margin-top:10px;">Clarity, compliance, and confidence in one view.</div>
+                                    <div style="margin-top:24px;">
+                                        <label for="sprintFilter" style="font-size:1.1em;color:#0A2342;margin-right:8px;">Sprint:</label>
+                                        <select id="sprintFilter" style="font-size:1.1em;padding:6px 12px;border-radius:6px;border:1px solid #e5e7eb;">
+                                            <option value="28">Sprint 28</option>
+                                            <option value="27">Sprint 27</option>
+                                            <option value="all">All</option>
+                                        </select>
+                                        <label for="teamFilter" style="font-size:1.1em;color:#0A2342;margin-left:16px;margin-right:8px;">Team:</label>
+                                        <select id="teamFilter" style="font-size:1.1em;padding:6px 12px;border-radius:6px;border:1px solid #e5e7eb;">
+                                            <option value="leadership">Leadership</option>
+                                            <option value="dev">Dev</option>
+                                            <option value="all">All</option>
+                                        </select>
+                                    </div>
+                                    <div style="margin-top:24px;display:flex;justify-content:center;gap:32px;flex-wrap:wrap;">
+                                        <div style="background:#10B981;color:#fff;border-radius:8px;padding:16px 24px;min-width:180px;text-align:center;">
+                                            <div style="font-size:1.2em;font-weight:bold;">Deliverables</div>
+                                            <div style="font-size:2em;font-weight:bold;">✔️ 4/5</div>
+                                            <div style="font-size:1em;">80% Complete</div>
+                                        </div>
+                                        <div style="background:#f39c12;color:#fff;border-radius:8px;padding:16px 24px;min-width:180px;text-align:center;">
+                                            <div style="font-size:1.2em;font-weight:bold;">Escalations</div>
+                                            <div style="font-size:2em;font-weight:bold;">⏳ 1 Active</div>
+                                            <div style="font-size:1em;">Awaiting PPT</div>
+                                        </div>
+                                        <div style="background:#2980b9;color:#fff;border-radius:8px;padding:16px 24px;min-width:180px;text-align:center;">
+                                            <div style="font-size:1.2em;font-weight:bold;">Launch Readiness</div>
+                                            <div style="font-size:2em;font-weight:bold;">🚀 Ready</div>
+                                            <div style="font-size:1em;">Wireframe contingency available</div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top:24px;">
+                                        <canvas id="deliverablesBarChart" width="400" height="120" aria-label="Deliverables Bar Chart"></canvas>
+                                        <canvas id="escalationsTrendChart" width="400" height="120" aria-label="Escalations Trend Chart"></canvas>
+                                        <canvas id="readinessTrafficChart" width="400" height="120" aria-label="Launch Readiness Traffic-Light"></canvas>
+                                    </div>
+                                    <div style="margin-top:24px;">
+                                        <input type="text" id="searchPanel" placeholder="Search deliverables or escalations..." style="font-size:1.1em;padding:6px 12px;border-radius:6px;border:1px solid #e5e7eb;width:320px;">
+                                        <button class="button" aria-label="Drill down" style="font-size:1.1em;background-color:#2563EB;margin-left:8px;" onclick="drillDownPanel()">Drill Down</button>
+                                        <button class="button" aria-label="Export CSV" style="font-size:1.1em;background-color:#10B981;margin-left:8px;" onclick="exportPanelCSV()">Export CSV</button>
+                                        <button class="button" aria-label="Export Excel" style="font-size:1.1em;background-color:#b7950b;margin-left:8px;" onclick="exportPanelExcel()">Export Excel</button>
+                                                    <script>
+                                                    // ...existing chart code...
+                                                    function drillDownPanel() {
+                                                        // Example: fetch drill-down data from backend
+                                                        fetch('/api/drilldown/deliverables').then(r=>r.json()).then(data=>{
+                                                            alert('Drill-down records: '+JSON.stringify(data.records));
+                                                        });
+                                                    }
+                                                    function exportPanelCSV() {
+                                                        // Example: export filtered records as CSV
+                                                        fetch('/api/drilldown/deliverables').then(r=>r.json()).then(data=>{
+                                                            fetch('/api/export/csv', {
+                                                                method:'POST',
+                                                                headers:{'Content-Type':'application/json'},
+                                                                body:JSON.stringify({records:data.records,role:'leadership'})
+                                                            }).then(resp=>resp.blob()).then(blob=>{
+                                                                const link = document.createElement('a');
+                                                                link.href = URL.createObjectURL(blob);
+                                                                link.download = 'dashboard_export.csv';
+                                                                document.body.appendChild(link);
+                                                                link.click();
+                                                                document.body.removeChild(link);
+                                                            });
+                                                        });
+                                                    }
+                                                    function exportPanelExcel() {
+                                                        fetch('/api/drilldown/deliverables').then(r=>r.json()).then(data=>{
+                                                            fetch('/api/export/excel', {
+                                                                method:'POST',
+                                                                headers:{'Content-Type':'application/json'},
+                                                                body:JSON.stringify({records:data.records,role:'leadership'})
+                                                            }).then(resp=>resp.blob()).then(blob=>{
+                                                                const link = document.createElement('a');
+                                                                link.href = URL.createObjectURL(blob);
+                                                                link.download = 'dashboard_export.xlsx';
+                                                                document.body.appendChild(link);
+                                                                link.click();
+                                                                document.body.removeChild(link);
+                                                            });
+                                                        });
+                                                    }
+                                    </div>
+                                </div>
+                                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                                <script>
+                                // Example metric visualizations
+                                const deliverablesBar = document.getElementById('deliverablesBarChart').getContext('2d');
+                                new Chart(deliverablesBar, {
+                                    type: 'bar',
+                                    data: { labels: ['Toolkit','Outline','Templates','Icons','PPT'], datasets: [{ label: 'Status', data: [1,1,1,1,0], backgroundColor: ['#10B981','#10B981','#10B981','#10B981','#f39c12'] }] },
+                                    options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:1}} }
+                                });
+                                const escalationsTrend = document.getElementById('escalationsTrendChart').getContext('2d');
+                                new Chart(escalationsTrend, {
+                                    type: 'line',
+                                    data: { labels: ['Mon','Tue','Wed','Thu','Fri'], datasets: [{ label: 'Escalations', data: [0,0,1,1,1], borderColor:'#f39c12',backgroundColor:'#fffbe6',fill:false }] },
+                                    options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:2}} }
+                                });
+                                const readinessTraffic = document.getElementById('readinessTrafficChart').getContext('2d');
+                                new Chart(readinessTraffic, {
+                                    type: 'doughnut',
+                                    data: { labels: ['Ready','Contingency','Blocked'], datasets: [{ data: [1,1,0], backgroundColor: ['#2980b9','#10B981','#e74c3c'] }] },
+                                    options: { responsive:true, plugins:{legend:{display:true}} }
+                                });
+                                // Accessibility: keyboard focus, alt text, screen reader
+                                document.querySelectorAll('.button').forEach(btn => {
+                                    btn.setAttribute('tabindex','0');
+                                    btn.setAttribute('role','button');
+                                });
+                                // Drill-down handler
+                                document.querySelector('.button[aria-label="Drill down"]').onclick = function() {
+                                    alert('Drill-down: Detailed breakdown coming soon.');
+                                };
+                                </script>
+                <!-- Sprint 28: Progress Panels -->
+                <div class="panel" style="background:#eaf6ff;border:2px solid #27ae60;margin-bottom:30px;border-radius:8px;padding:24px;font-family:'Segoe UI',Arial,sans-serif;">
+                    <h2 style="color:#27ae60;">Deliverables Progress</h2>
+                    <ul style="font-size:1.1em;">
+                        <li>Toolkit: <span aria-label="completed" style="color:#27ae60;font-weight:bold;">✔️ Finalized</span></li>
+                        <li>Outline: <span aria-label="completed" style="color:#27ae60;font-weight:bold;">✔️ Ready</span></li>
+                        <li>Templates: <span aria-label="completed" style="color:#27ae60;font-weight:bold;">✔️ Bundled</span></li>
+                        <li>Icons: <span aria-label="completed" style="color:#27ae60;font-weight:bold;">✔️ Prepared</span></li>
+                        <li>PPT: <span aria-label="pending" style="color:#f39c12;font-weight:bold;">⏳ Pending (escalated)</span></li>
+                    </ul>
+                </div>
+
+                <div class="panel" style="background:#fffbe6;border:2px solid #f39c12;margin-bottom:30px;border-radius:8px;padding:24px;font-family:'Segoe UI',Arial,sans-serif;">
+                    <h2 style="color:#f39c12;">Escalation Status</h2>
+                    <ul style="font-size:1.1em;">
+                        <li>Escalations Raised: <span style="color:#f39c12;font-weight:bold;">1</span></li>
+                        <li>Escalations Resolved: <span style="color:#27ae60;font-weight:bold;">0</span></li>
+                        <li>Current Action: <span style="color:#2980b9;font-weight:bold;">Awaiting PPT delivery</span></li>
+                        <li>Contingency Plan: <span style="color:#27ae60;font-weight:bold;">Ready</span></li>
+                    </ul>
+                </div>
+
+                <div class="panel" style="background:#eaf6ff;border:2px solid #2980b9;margin-bottom:30px;border-radius:8px;padding:24px;font-family:'Segoe UI',Arial,sans-serif;">
+                    <h2 style="color:#2980b9;">Launch Readiness</h2>
+                    <ul style="font-size:1.1em;">
+                        <li>Dashboard Launch: <span style="color:#27ae60;font-weight:bold;">Cleared</span></li>
+                        <li>Wireframe Contingency: <span style="color:#27ae60;font-weight:bold;">Available</span></li>
+                        <li>Leadership Visibility: <span style="color:#2980b9;font-weight:bold;">Integrated</span></li>
+                        <li>Accessibility Improvements: <span style="color:#27ae60;font-weight:bold;">Included</span></li>
+                        <li>Slack Notifications: <span style="color:#2980b9;font-weight:bold;">Enabled</span></li>
+                    </ul>
+                </div>
+
+                <!-- Accessibility & Leadership Notification Scripts -->
+                <script>
+                // Accessibility improvements: ARIA labels, keyboard navigation, high-contrast support
+                document.body.setAttribute('aria-label', 'Sprint 28: On Track & Visible');
+                // Placeholder for Slack notification integration
+                function notifyLeadershipSlack(message) {
+                    // TODO: Integrate with backend Slack notification endpoint
+                    console.log('Slack notification sent:', message);
+                }
+                </script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Engine Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .panel { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; background: #f9f9f9; }
+        h2 { color: #2c3e50; }
+        .filters { margin-bottom: 10px; }
+        @media (max-width: 800px) {
+            .panel { width: 100%; display: block; }
+        }
+        @media (min-width: 801px) {
+            .panel { width: 45%; display: inline-block; vertical-align: top; margin-right: 2%; }
+        }
+        .alert-high { color: #fff; background: #e74c3c; padding: 8px; border-radius: 4px; }
+        .alert-medium { color: #fff; background: #f39c12; padding: 8px; border-radius: 4px; }
+        .alert-low { color: #222; background: #f1c40f; padding: 8px; border-radius: 4px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    function exportSummary(fmt) {
+        const url = `/api/export-summary/${fmt}`;
+        if (fmt === 'html') {
+            fetch(url)
+                .then(resp => resp.text())
+                .then(html => {
+                    const blob = new Blob([html], {type: 'text/html'});
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'Executive_Summary_Q1_2026.html';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+        } else if (fmt === 'pdf') {
+            fetch(url)
+                .then(resp => resp.blob())
+                .then(pdf => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(pdf);
+                    link.download = 'Executive_Summary_Q1_2026.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+        }
+    }
+    </script>
+</head>
+<body>
+                        <!-- Real-Time Updates & Scheduled Reports Scripts -->
+                        <script>
+                        // Panel auto-refresh logic
+                        function refreshPanels() {
+                            // Feedback Panel
+                            fetch('/api/export/feedback').then(r=>r.json()).then(data=>{
+                                // Update User Feedback Panel
+                                detectAnomalies(data, 'User Feedback');
+                                // TODO: Update DOM with feedback data
+                            });
+                            // System Performance Panel
+                            fetch('/api/export/performance').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'System Performance');
+                                // TODO: Update DOM with performance data
+                            });
+                            // Engagement Trends Panel
+                            fetch('/api/export/engagement').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Engagement Trends');
+                                // TODO: Update DOM with engagement data
+                            });
+                            // Data Export Activity Panel
+                            fetch('/api/export/data-export').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Data Export Activity');
+                                // TODO: Update DOM with export activity data
+                            });
+                            // Notification Center Panel
+                            fetch('/api/live-alerts').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Notification Center');
+                                // TODO: Update DOM with notification data
+                            });
+                            // World Data Users Panel
+                            fetch('/api/export/world-data').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'World Data Users');
+                                // TODO: Update DOM with world data
+                            });
+                            // TES Panel
+                            fetch('/api/export/tes').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'TES');
+                                // TODO: Update DOM with TES data
+                            });
+                            // Gamification Stats Panel
+                            fetch('/api/export/gamification').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Gamification Stats');
+                                // TODO: Update DOM with gamification data
+                            });
+                            // Threat Trends Panel
+                            fetch('/api/export/threat-trends').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Threat Trends');
+                                // TODO: Update DOM with threat trends data
+                            });
+                            // Compliance Leaderboard Panel
+                            fetch('/api/export/compliance').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Compliance Leaderboard');
+                                // TODO: Update DOM with compliance data
+                            });
+                        }
+                        // Auto-refresh every 5 min
+                        setInterval(refreshPanels, 300000);
+                        refreshPanels(); // Initial load
+
+                        // Daily compliance/gamification refresh at midnight
+                        function dailyRefresh() {
+                            fetch('/api/export/compliance').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Compliance Leaderboard');
+                                // TODO: Update DOM with compliance data
+                            });
+                            fetch('/api/export/gamification').then(r=>r.json()).then(data=>{
+                                detectAnomalies(data, 'Gamification Stats');
+                                // TODO: Update DOM with gamification data
+                            });
+                        }
+                        let now = new Date();
+                        let msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 0, 0) - now;
+                        setTimeout(function() {
+                            dailyRefresh();
+                            setInterval(dailyRefresh, 86400000);
+                        }, msToMidnight);
+
+
+                        // Alert & Automation Logic
+                        let activeAlerts = [];
+                        function checkAlerts(metrics) {
+                            // Critical Alerts
+                            if (metrics.sla < 95) {
+                                triggerAlert('critical', 'SLA below 95%', metrics, 'Notification Center');
+                            }
+                            if (metrics.bounceRate > 3) {
+                                triggerAlert('warning', 'Bounce rate above 3%', metrics, 'Notification Center');
+                            }
+                            if (metrics.threatIncidents > 10) {
+                                triggerAlert('critical', 'Threat incidents > 10', metrics, 'Notification Center');
+                            }
+                            if (metrics.responseTime && metrics.responseTime > 2) {
+                                triggerAlert('warning', 'Server response time > 2s', metrics, 'System Performance');
+                            }
+                        }
+
+                        function triggerAlert(severity, message, metrics, panel) {
+                            // Add alert to activeAlerts
+                            const alertId = Date.now() + Math.random();
+                            activeAlerts.push({id: alertId, severity, message, metrics, panel, timestamp: Date.now(), resolved: false});
+                            showPanelAlert(panel, `${severity.toUpperCase()}: ${message}`);
+                            // Log incident
+                            fetch('/api/log-incident', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:message, severity, timestamp:Date.now(), details:metrics})});
+                            // Automation: escalate if critical and unresolved after 30 min
+                            if (severity === 'critical') {
+                                setTimeout(() => {
+                                    const alert = activeAlerts.find(a => a.id === alertId && !a.resolved);
+                                    if (alert) {
+                                        fetch('/api/escalate-incident', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({incident_id:alertId, level:'senior-admin', timestamp:Date.now()})});
+                                        showPanelAlert(panel, 'Escalated to senior admin.');
+                                    }
+                                }, 1800000); // 30 min
+                                setTimeout(() => {
+                                    const alert = activeAlerts.find(a => a.id === alertId && !a.resolved);
+                                    if (alert) {
+                                        fetch('/api/escalate-incident', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({incident_id:alertId, level:'leadership', timestamp:Date.now()})});
+                                        showPanelAlert(panel, 'Escalated to leadership.');
+                                    }
+                                }, 7200000); // 2 hours
+                            }
+                            // Auto-refresh affected panel every 5 min until resolved
+                            const refreshInterval = setInterval(() => {
+                                if (activeAlerts.find(a => a.id === alertId && !a.resolved)) {
+                                    refreshPanels();
+                                    showPanelAlert(panel, 'Panel auto-refreshed due to active alert.');
+                                } else {
+                                    clearInterval(refreshInterval);
+                                }
+                            }, 300000);
+                            // Auto-archive after 7 days
+                            setTimeout(() => {
+                                const alert = activeAlerts.find(a => a.id === alertId && !a.resolved);
+                                if (alert) {
+                                    fetch('/api/archive-alert', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({alert_id:alertId, severity})});
+                                    alert.resolved = true;
+                                    showPanelAlert(panel, 'Alert auto-archived after 7 days.');
+                                }
+                            }, 604800000);
+                        }
+
+                        // Dismissal, warning, informational alerts
+                        function dismissAlert(alertId) {
+                            const alert = activeAlerts.find(a => a.id === alertId);
+                            if (alert) {
+                                alert.resolved = true;
+                                showPanelAlert(alert.panel, 'Alert dismissed.');
+                            }
+                        }
+
+                        // Anomaly detection for panel data
+                        function detectAnomalies(data, panel) {
+                            if (data && typeof data === 'object') {
+                                Object.keys(data).forEach(key => {
+                                    if (typeof data[key] === 'number' && (data[key] > 10000 || data[key] < 0)) {
+                                        triggerAlert('warning', `Anomaly detected in ${key}: ${data[key]}`, data, panel);
+                                    }
+                                });
+                            }
+                        }
+
+                        // Show alert in panel header
+                        function showPanelAlert(panel, message) {
+                            // TODO: Replace alert() with in-panel notification UI
+                            alert(`${panel}: ${message}`);
+                        }
+
+                        // Weekly summary report (Monday 9 AM)
+                        function scheduleWeeklyReport() {
+                            fetch('/api/export/weekly-summary').then(r=>r.json()).then(data=>{
+                                showPanelAlert('Notification Center', 'Weekly summary report sent to leadership.');
+                            });
+                        }
+                        let nextMonday = new Date();
+                        nextMonday.setDate(nextMonday.getDate() + ((8 - nextMonday.getDay()) % 7));
+                        nextMonday.setHours(9,0,0,0);
+                        let msToMonday = nextMonday - now;
+                        setTimeout(function() {
+                            scheduleWeeklyReport();
+                            setInterval(scheduleWeeklyReport, 604800000);
+                        }, msToMonday);
+
+                        // Export automation: daily snapshot
+                        function exportDailySnapshot() {
+                            fetch('/api/export/snapshot').then(r=>r.json()).then(data=>{
+                                showPanelAlert('Notification Center', 'Daily snapshot archived.');
+                            });
+                        }
+                        setInterval(exportDailySnapshot, 86400000);
+                        </script>
+                    <!-- Dashboard Welcome Banner & Tagline -->
+                    <div style="background:linear-gradient(90deg,#eaf6ff,#fffbe6);padding:32px 24px;border-radius:12px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;">
+                        <div>
+                            <h1 style="color:#2980b9;font-size:2em;margin-bottom:8px;">Welcome to your analytics hub</h1>
+                            <div style="font-size:1.2em;color:#888;font-style:italic;">Insight. Action. Trust.</div>
+                        </div>
+                                        </div>
+
+                                        <!-- Sprint 28 Executive Summary (Quick Recap) Panel -->
+                                        <div class="panel" style="background:#fffbe6;border:2px solid #b7950b;margin-bottom:30px;border-radius:8px;padding:24px;font-family:'Segoe UI',Arial,sans-serif;">
+                                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                                                <img src="/static/company_logo.png" alt="Company Logo" style="height:48px;">
+                                                <h2 style="color:#2980b9;margin:0;">Sprint 28 Executive Summary</h2>
+                                                <span style="color:#b7950b;font-size:1.1em;font-weight:bold;">Prepared by Richard Norman— Sprint 28</span>
+                                            </div>
+                                            <div style="background:#eaf6ff;border-radius:8px;padding:16px;margin-bottom:16px;display:flex;gap:24px;">
+                                                <div style="flex:1;">
+                                                    <h3 style="color:#27ae60;margin-bottom:8px;">Green (Completed)</h3>
+                                                    <ul>
+                                                        <li>Facilitator Toolkit finalized</li>
+                                                        <li>Exercise Outline ready</li>
+                                                        <li>Kanban Templates bundled</li>
+                                                        <li>Icon Files prepared</li>
+                                                    </ul>
+                                                </div>
+                                                <div style="flex:1;">
+                                                    <h3 style="color:#f39c12;margin-bottom:8px;">Amber (Pending)</h3>
+                                                    <ul>
+                                                        <li>Polished PPT design pending</li>
+                                                        <li>Escalation issued for delivery today</li>
+                                                    </ul>
+                                                </div>
+                                                <div style="flex:1;">
+                                                    <h3 style="color:#e74c3c;margin-bottom:8px;">Red (Blocked)</h3>
+                                                    <ul>
+                                                        <li>Dashboard launch dependent on PPT delivery</li>
+                                                        <li>Wireframe contingency ready</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div style="display:flex;gap:24px;margin-bottom:16px;">
+                                                <div style="flex:1;background:#fff;border-radius:8px;padding:16px;">
+                                                    <h4 style="color:#2980b9;margin-bottom:8px;">Key Metrics</h4>
+                                                    <ul style="font-size:1.05em;">
+                                                        <li>Deliverables completed: <span style="color:#27ae60;font-weight:bold;">4</span></li>
+                                                        <li>Deliverables pending: <span style="color:#f39c12;font-weight:bold;">1</span></li>
+                                                        <li>Escalations raised: <span style="color:#f39c12;font-weight:bold;">1</span></li>
+                                                        <li>Escalations resolved: <span style="color:#27ae60;font-weight:bold;">0</span></li>
+                                                        <li>Dashboard launch readiness: <span style="color:#2980b9;font-weight:bold;">Ready</span></li>
+                                                        <li>Contingency plan: <span style="color:#27ae60;font-weight:bold;">Available</span></li>
+                                                    </ul>
+                                                </div>
+                                                <div style="flex:1;background:#fff;border-radius:8px;padding:16px;">
+                                                    <h4 style="color:#2980b9;margin-bottom:8px;">Additional Executive Metrics</h4>
+                                                    <ul style="font-size:1.05em;">
+                                                        <li>Delivery stats: <span style="color:#27ae60;">80% completed, 20% pending</span></li>
+                                                        <li>Compliance: <span style="color:#27ae60;">All deadlines met except PPT</span></li>
+                                                        <li>Engagement: <span style="color:#2980b9;">Leadership visibility, stakeholder updates sent</span></li>
+                                                        <li>Risk: <span style="color:#f39c12;">Escalation active, contingency plan ready</span></li>
+                                                        <li>Readiness: <span style="color:#27ae60;">Dashboard launch cleared</span></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div style="margin-top:16px;font-size:1.05em;color:#888;">
+                                                <strong>Sprint 28 update:</strong> All core deliverables (toolkit, outline, templates, icons) are finalized and bundled <span style="color:#27ae60;">✅</span>. The polished PPT is still pending but escalation is in progress <span style="color:#f39c12;">⚠️</span>. Dashboard launch remains on track <span style="color:#2980b9;">🚀</span> — wireframe contingency is ready if needed. The final package will be shared as soon as the PPT is delivered.
+                                            </div>
+                                            <div style="margin-top:24px;text-align:right;">
+                                                <button onclick="exportSprint28Recap('html')" style="background:#2980b9;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:1.1em;">Export Recap as HTML</button>
+                                                <button onclick="exportSprint28Recap('pdf')" style="background:#b7950b;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:1.1em;margin-left:8px;">Export Recap as PDF</button>
+                                            </div>
+                                            <div style="margin-top:16px;text-align:center;color:#b7950b;font-size:0.95em;">© 2026 Company Name. All rights reserved.</div>
+                                        </div>
+                                            function exportSprint28Recap(fmt) {
+                                                const url = `/api/export-sprint28-recap/${fmt}`;
+                                                if (fmt === 'html') {
+                                                    fetch(url)
+                                                        .then(resp => resp.text())
+                                                        .then(html => {
+                                                            const blob = new Blob([html], {type: 'text/html'});
+                                                            const link = document.createElement('a');
+                                                            link.href = URL.createObjectURL(blob);
+                                                            link.download = 'Sprint28_Executive_Recap.html';
+                                                            document.body.appendChild(link);
+                                                            link.click();
+                                                            document.body.removeChild(link);
+                                                        });
+                                                } else if (fmt === 'pdf') {
+                                                    fetch(url)
+                                                        .then(resp => resp.blob())
+                                                        .then(pdf => {
+                                                            const link = document.createElement('a');
+                                                            link.href = URL.createObjectURL(pdf);
+                                                            link.download = 'Sprint28_Executive_Recap.pdf';
+                                                            document.body.appendChild(link);
+                                                            link.click();
+                                                            document.body.removeChild(link);
+                                                        });
+                                                }
+                                            }
+                        <div style="display:flex;align-items:center;gap:16px;">
+                            <span title="Shows the current dashboard mood — Inspirational, Professional, or Playful." style="font-size:2em;cursor:pointer;">🎛️</span>
+                            <span style="font-size:1.1em;color:#b7950b;">Tone: Professional</span>
+                        </div>
+                    </div>
+
+                    <!-- Theme Customization Bar -->
+                    <div style="background:#fff;border:1px solid #eaf6ff;padding:12px 24px;border-radius:8px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
+                        <span style="font-size:1.1em;color:#2980b9;">Theme:</span>
+                        <button style="background:#eaf6ff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Light</button>
+                        <button style="background:#222;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Dark</button>
+                        <button style="background:#f9f6ff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Corporate</button>
+                        <span style="font-size:1.1em;color:#b7950b;">Accent:</span>
+                        <button style="background:#2980b9;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Blue</button>
+                        <button style="background:#27ae60;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Green</button>
+                        <button style="background:#e67e22;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Orange</button>
+                    </div>
+
+                    <!-- Panel Group: Engagement -->
+                    <div style="background:#eaf6ff;padding:16px 8px;border-radius:8px;margin-bottom:24px;">
+                        <h2 style="color:#2980b9;margin-left:16px;">Engagement</h2>
+                        <div style="display:flex;flex-wrap:wrap;gap:24px;">
+                            <!-- User Feedback Panel -->
+                            ...existing code...
+                            <!-- Engagement Trends Panel -->
+                            ...existing code...
+                            <!-- Gamification Stats Panel -->
+                            ...existing code...
+                        </div>
+                    </div>
+
+                    <!-- Panel Group: Performance -->
+                    <div style="background:#f9f6ff;padding:16px 8px;border-radius:8px;margin-bottom:24px;">
+                        <h2 style="color:#8e44ad;margin-left:16px;">Performance</h2>
+                        <div style="display:flex;flex-wrap:wrap;gap:24px;">
+                            <!-- System Performance Panel -->
+                            ...existing code...
+                            <!-- Transactional Email Service (TES) Panel -->
+                            ...existing code...
+                            <!-- Data Export Activity Panel -->
+                            ...existing code...
+                        </div>
+                    </div>
+
+                    <!-- Panel Group: Oversight -->
+                    <div style="background:#fffbe6;padding:16px 8px;border-radius:8px;margin-bottom:24px;">
+                        <h2 style="color:#b7950b;margin-left:16px;">Oversight</h2>
+                        <div style="display:flex;flex-wrap:wrap;gap:24px;">
+                            <!-- Compliance Leaderboard Panel -->
+                            ...existing code...
+                            <!-- Notification Center Panel -->
+                            ...existing code...
+                            <!-- Threat Trends Panel -->
+                            ...existing code...
+                        </div>
+                    </div>
+
+                    <!-- Panel Group: Global Adoption -->
+                    <div style="background:#eaf6ff;padding:16px 8px;border-radius:8px;margin-bottom:24px;">
+                        <h2 style="color:#2980b9;margin-left:16px;">Global Adoption</h2>
+                        <div style="display:flex;flex-wrap:wrap;gap:24px;">
+                            <!-- World Data Users Panel -->
+                            ...existing code...
+                        </div>
+                    </div>
+
+                    <!-- Automation Info Bar -->
+                    <div style="background:#fff;border:1px solid #eaf6ff;padding:12px 24px;border-radius:8px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
+                        <span style="font-size:1.1em;color:#2980b9;">Automation:</span>
+                        <span style="color:#888;">Core metrics refresh every 5 min; compliance/gamification daily; feedback hourly.</span>
+                        <span style="color:#e67e22;">Alerts: SLA <95% or bounce >3% triggers notification.</span>
+                        <span style="color:#b7950b;">Weekly summary sent Mondays 9 AM.</span>
+                    </div>
+                <!-- Threat Trends Panel -->
+                <div class="panel" style="background:#eaf6ff;border:2px solid #2980b9;margin-bottom:30px;border-radius:8px;padding:24px;">
+                    <h2 style="color:#2980b9;">Threat Trends</h2>
+                    <div id="threatTrendsChart" style="height:220px;"></div>
+                    <div style="margin-top:12px;color:#888;">Visualize threat types, frequency, and trend lines by quarter.</div>
+                </div>
+
+                <!-- Compliance Leaderboard Panel -->
+                <div class="panel" style="background:#eaf6ff;border:2px solid #27ae60;margin-bottom:30px;border-radius:8px;padding:24px;">
+                    <h2 style="color:#27ae60;display:flex;align-items:center;">Compliance Leaderboard
+                        <span style="margin-left:8px;cursor:pointer;" title="See compliance achievements and identify areas for improvement.">ℹ️</span>
+                    </h2>
+                    <table style="width:100%;margin-top:8px;">
+                        <tr><th>Department</th><th>SPF</th><th>DKIM</th><th>DMARC</th><th>Score</th><th>Badge</th></tr>
+                        <tr><td>IT</td><td>✔️</td><td>✔️</td><td>✔️</td><td>98</td><td><span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Compliance Guardian 🔒✔️</span></td></tr>
+                        <tr><td>Finance</td><td>✔️</td><td>✔️</td><td>❌</td><td>85</td><td><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Engagement Star ✨⬆️</span></td></tr>
+                        <tr><td>HR</td><td>✔️</td><td>❌</td><td>✔️</td><td>90</td><td><span style="background:#2980b9;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Detection Hero 🛡️🔍</span></td></tr>
+                    </table>
+                    <div style="margin-top:12px;color:#888;">Leaderboard for compliance metrics by department. Badge winners updated.</div>
+                </div>
+    <!-- World Data Users Panel -->
+    <div class="panel" style="background:#eaf6ff;border:2px solid #2980b9;margin-bottom:30px;border-radius:8px;padding:24px;">
+        <h2 style="color:#2980b9;display:flex;align-items:center;">World Data Users
+            <span style="margin-left:8px;cursor:pointer;" title="View global user distribution, active sessions, and growth trends.">🌍</span>
+        </h2>
+        <ul style="font-size:1.05em;">
+            <li><strong>Active Sessions:</strong> 1,240</li>
+            <li><strong>Top Regions:</strong> US, UK, India, Germany</li>
+            <li><strong>Growth Trend:</strong> +12% month-over-month</li>
+        </ul>
+        <div style="margin-top:12px;color:#888;">Tracks global user distribution and adoption.</div>
+    </div>
+
+    <!-- User Feedback Panel -->
+    <div class="panel" style="background:#fffbe6;border:2px solid #e67e22;margin-bottom:30px;border-radius:8px;padding:24px;">
+        <h2 style="color:#e67e22;display:flex;align-items:center;">User Feedback
+            <span style="margin-left:8px;cursor:pointer;" title="Displays recent comments, sentiment, and feedback trends.">💬</span>
+        </h2>
+        <ul style="font-size:1.05em;">
+            <li><strong>Recent Comments:</strong> “Great dashboard!” “Needs more export options.”</li>
+            <li><strong>Sentiment Score:</strong> 87% positive</li>
+            <li><strong>Feedback Trend:</strong> +5% improvement this quarter</li>
+        </ul>
+        <div style="margin-top:12px;color:#888;">Visualizes user input and satisfaction.</div>
+    </div>
+
+    <!-- System Performance Panel -->
+    <div class="panel" style="background:#f9f6ff;border:2px solid #8e44ad;margin-bottom:30px;border-radius:8px;padding:24px;">
+        <h2 style="color:#8e44ad;display:flex;align-items:center;">System Performance
+            <span style="margin-left:8px;cursor:pointer;" title="Monitors backend health, uptime, and error rates.">🖥️</span>
+        </h2>
+        <ul style="font-size:1.05em;">
+            <li><strong>Server Load:</strong> 42%</li>
+            <li><strong>Response Time:</strong> 210ms avg</li>
+            <li><strong>Error Rate:</strong> 0.8%</li>
+            <li><strong>Uptime:</strong> 99.9%</li>
+        </ul>
+        <div style="margin-top:12px;color:#888;">Backend health and uptime monitoring.</div>
+    </div>
+
+    <!-- Engagement Trends Panel -->
+    <div class="panel" style="background:#eaf6ff;border:2px solid #b7950b;margin-bottom:30px;border-radius:8px;padding:24px;">
+        <h2 style="color:#b7950b;display:flex;align-items:center;">Engagement Trends
+            <span style="margin-left:8px;cursor:pointer;" title="Tracks session duration, click rates, and feature usage.">📈</span>
+        </h2>
+        <ul style="font-size:1.05em;">
+            <li><strong>Avg Session Duration:</strong> 7m 12s</li>
+            <li><strong>Click-Through Rate:</strong> 42%</li>
+            <li><strong>Feature Usage:</strong> Heatmap available</li>
+            <li><strong>Drop-off Points:</strong> Settings, Export</li>
+        </ul>
+        <div style="margin-top:12px;color:#888;">Tracks user interaction patterns and engagement.</div>
+    </div>
+
+    <!-- Data Export Activity Panel -->
+    <div class="panel" style="background:#fffbe6;border:2px solid #e67e22;margin-bottom:30px;border-radius:8px;padding:24px;">
+        <h2 style="color:#e67e22;display:flex;align-items:center;">Data Export Activity
+            <span style="margin-left:8px;cursor:pointer;" title="Logs export/download actions by file type and user role.">📤</span>
+        </h2>
+        <ul style="font-size:1.05em;">
+            <li><strong>Export Volume:</strong> 320 files (last 30 days)</li>
+            <li><strong>Top File Type:</strong> CSV</li>
+            <li><strong>Peak Export Hour:</strong> 11:00 AM</li>
+            <li><strong>User Roles:</strong> Admin, Analyst, Manager</li>
+        </ul>
+        <div style="margin-top:12px;color:#888;">Visualizes export activity and user roles.</div>
+    </div>
+
+    <!-- Notification Center Panel -->
+    <div class="panel" style="background:#f9f6ff;border:2px solid #8e44ad;margin-bottom:30px;border-radius:8px;padding:24px;">
+        <h2 style="color:#8e44ad;display:flex;align-items:center;">Notification Center
+            <span style="margin-left:8px;cursor:pointer;" title="Centralizes alerts, updates, and system messages.">🔔</span>
+        </h2>
+        <ul style="font-size:1.05em;">
+            <li><strong>Real-Time Alerts:</strong> 2 active</li>
+            <li><strong>Scheduled Maintenance:</strong> 2026-03-10 02:00</li>
+            <li><strong>User Reminders:</strong> 5 pending</li>
+        </ul>
+        <div style="margin-top:12px;color:#888;">Centralizes system messages and alerts.</div>
+    </div>
+
+                <!-- Gamification Stats Panel -->
+                <div class="panel" style="background:#fffbe6;border:2px solid #e67e22;margin-bottom:30px;border-radius:8px;padding:24px;">
+                    <h2 style="color:#e67e22;">Gamification Stats</h2>
+                    <div style="display:flex;align-items:center;">
+                        <div style="margin-right:24px;text-align:center;">
+                            <span style="font-size:2em;">✨</span><br>Badges Earned: <strong>42</strong>
+                        </div>
+                        <div style="margin-right:24px;text-align:center;">
+                            <span style="font-size:2em;">⬆️</span><br>Participation Rate: <strong>78%</strong>
+                        </div>
+                        <div style="text-align:center;">
+                            <span style="font-size:2em;">🏆</span><br>Quarterly Titans: <strong>3</strong>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;color:#888;">Track gamified achievements and engagement.</div>
+                </div>
+
+                <!-- Department Comparison Panel -->
+                <div class="panel" style="background:#eaf6ff;border:2px solid #b7950b;margin-bottom:30px;border-radius:8px;padding:24px;">
+                    <h2 style="color:#b7950b;">Department Comparison</h2>
+                    <table style="width:100%;margin-top:8px;">
+                        <tr><th>Department</th><th>Threats Detected</th><th>Compliance Score</th><th>Participation</th></tr>
+                        <tr><td>IT</td><td>120</td><td>98</td><td>82%</td></tr>
+                        <tr><td>Finance</td><td>80</td><td>85</td><td>75%</td></tr>
+                        <tr><td>HR</td><td>60</td><td>90</td><td>68%</td></tr>
+                    </table>
+                    <div style="margin-top:12px;color:#888;">Compare departments on key metrics.</div>
+                </div>
+
+                <!-- Transactional Email Service (TES) Panel -->
+                <div class="panel" style="background:#f9f6ff;border:2px solid #8e44ad;margin-bottom:30px;border-radius:8px;padding:24px;position:relative;">
+                    <h2 style="color:#8e44ad;display:inline-block;">🔔 Transactional Email Service (TES) Panel</h2>
+                    <span style="position:absolute;top:24px;right:32px;font-size:1.2em;cursor:pointer;color:#8e44ad;" title="Tracks the health, compliance, and delivery performance of our Transactional Email Service (TES) — ensuring password resets, alerts, and system notifications are fast, reliable, and secure.">❓</span>
+                        <style>
+                            .panel { transition: box-shadow 0.2s; }
+                            .panel:hover { box-shadow: 0 4px 16px #8e44ad33; }
+                            .dashboard-bg { background: linear-gradient(135deg, #eaf6ff 0%, #fffbe6 100%); min-height: 100vh; }
+                            .dashboard-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 2.2em; color: #2980b9; margin-bottom: 32px; text-align: center; letter-spacing: 0.02em; }
+                        </style>
+                        <div class="dashboard-bg">
+                            <div class="dashboard-title">Zero Trust Email Dashboard</div>
+                            <!-- ...existing panels... -->
+                        </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:24px;">
+                        <div style="flex:1;min-width:220px;">
+                            <h3 style="color:#8e44ad;display:flex;align-items:center;">📈 Delivery Stats
+                                <span style="margin-left:8px;cursor:pointer;" title="Shows latency, provider routing, and failover events for transactional emails.">🛈</span>
+                            </h3>
+                            <ul>
+                                <li>Latency: <strong>320ms</strong></li>
+                                <li>Provider Routing: <strong>SES 60%, SendGrid 25%, Mailgun 15%</strong></li>
+                                <li>Failover Events: <strong>2</strong> (last 30 days)</li>
+                            </ul>
+                        </div>
+                        <div style="flex:1;min-width:220px;">
+                            <h3 style="color:#27ae60;display:flex;align-items:center;">🛡 Compliance Status
+                                <span style="margin-left:8px;cursor:pointer;" title="Tracks SPF, DKIM, DMARC, and TLS coverage to ensure secure delivery.">🛈</span>
+                            </h3>
+                            <ul>
+                                <li>SPF: <span style="color:#27ae60;">✔️</span></li>
+                                <li>DKIM: <span style="color:#27ae60;">✔️</span></li>
+                                <li>DMARC: <span style="color:#27ae60;">✔️</span></li>
+                                <li>TLS Coverage: <strong>99%</strong></li>
+                            </ul>
+                        </div>
+                        <div style="flex:1;min-width:220px;">
+                            <h3 style="color:#e67e22;display:flex;align-items:center;">📊 Bounce & Suppression
+                                <span style="margin-left:8px;cursor:pointer;" title="Breaks down hard/soft bounces, complaints, and suppression list entries.">🛈</span>
+                            </h3>
+                            <ul>
+                                <li>Hard Bounces: <strong>12</strong></li>
+                                <li>Soft Bounces: <strong>34</strong></li>
+                                <li>Complaints: <strong>3</strong></li>
+                                <li>Suppression List Entries: <strong>18</strong></li>
+                            </ul>
+                        </div>
+                        <div style="flex:1;min-width:220px;">
+                            <h3 style="color:#2980b9;display:flex;align-items:center;">🧩 Template Insights
+                                <span style="margin-left:8px;cursor:pointer;" title="Displays usage by template type (resets, alerts, receipts) with open/click tracking.">🛈</span>
+                            </h3>
+                            <ul>
+                                <li>Password Resets: <strong>420</strong> sent, <strong>68%</strong> open rate</li>
+                                <li>Alerts: <strong>310</strong> sent, <strong>54%</strong> open rate</li>
+                                <li>Receipts: <strong>180</strong> sent, <strong>72%</strong> open rate</li>
+                                <li>Quiet Hours Impact: <strong>-8%</strong> engagement</li>
+                            </ul>
+                        </div>
+                        <div style="flex:1;min-width:220px;">
+                            <h3 style="color:#b7950b;display:flex;align-items:center;">🚨 System Health
+                                <span style="margin-left:8px;cursor:pointer;" title="Monitors retry queue depth, circuit breaker triggers, and SLA compliance.">🛈</span>
+                            </h3>
+                            <ul>
+                                <li>Retry Queue Depth: <strong>6</strong></li>
+                                <li>Circuit Breaker Triggers: <strong>1</strong> (last 30 days)</li>
+                                <li>SLA Monitoring: <strong>99.8%</strong> uptime</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="margin-top:16px;color:#888;">Tracks health and performance of our Transactional Email Service — the engine behind password resets, verification codes, receipts, onboarding, alerts, and system notifications.</div>
+                </div>
+
+                <!-- Custom Panel: Email API Usage Overview -->
+                <div class="panel" style="background:#eaf6ff;border:2px solid #2980b9;margin-bottom:30px;border-radius:8px;padding:24px;">
+                    <h2 style="color:#2980b9;">Email API Usage Overview</h2>
+                    <ul style="font-size:1.05em;">
+                        <li><strong>API Calls:</strong> 2,340 (last 30 days)</li>
+                        <li><strong>Unique Clients:</strong> 18</li>
+                        <li><strong>Top Endpoint:</strong> /send-password-reset</li>
+                        <li><strong>Peak Hour:</strong> 10:00–11:00 AM</li>
+                    </ul>
+                    <div style="margin-top:12px;color:#888;">Monitor API usage patterns and identify high-traffic endpoints.</div>
+                </div>
+
+                <!-- Custom Panel: SLA & Alert Dashboard -->
+                <div class="panel" style="background:#fffbe6;border:2px solid #e67e22;margin-bottom:30px;border-radius:8px;padding:24px;">
+                    <h2 style="color:#e67e22;">SLA & Alert Dashboard</h2>
+                    <ul style="font-size:1.05em;">
+                        <li><strong>Current SLA:</strong> 99.8%</li>
+                        <li><strong>Alerts Triggered:</strong> 4 (last 30 days)</li>
+                        <li><strong>Last Alert:</strong> 2026-03-07 14:22</li>
+                        <li><strong>IP Warmup Progress:</strong> 85%</li>
+                    </ul>
+                    <div style="margin-top:12px;color:#888;">Track SLA compliance and alert history for operational reliability.</div>
+                </div>
+            <div class="panel" style="background:#fff;border:2px solid #f1c40f;margin-bottom:30px;box-shadow:0 2px 8px #f1c40f;border-radius:8px;padding:24px;">
+                <h2 style="color:#b7950b;text-align:center;margin-bottom:24px;">Recognition Spotlight – Security Champions & Teams</h2>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <!-- Left Column: Individuals -->
+                    <div style="flex:1;min-width:220px;padding:8px 16px;">
+                        <h3 style="color:#b7950b;">Individuals</h3>
+                        <div style="display:flex;align-items:center;margin-bottom:16px;">
+                            <img src="https://via.placeholder.com/48" alt="Champion Avatar" style="border-radius:50%;border:2px solid gold;margin-right:12px;">
+                            <div>
+                                <strong>Alex Kim</strong> <span style="color:#888;">(IT)</span><br>
+                                <span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Detection Hero <span style="font-size:1.1em;">🛡️🔍</span></span><br>
+                                <span style="color:#2980b9;font-weight:bold;">20% increase in reporting</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;margin-bottom:16px;">
+                            <img src="https://via.placeholder.com/48" alt="Champion Avatar" style="border-radius:50%;border:2px solid gold;margin-right:12px;">
+                            <div>
+                                <strong>Priya Singh</strong> <span style="color:#888;">(Compliance)</span><br>
+                                <span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Compliance Guardian <span style="font-size:1.1em;">🔒✔️</span></span><br>
+                                <span style="color:#27ae60;font-weight:bold;">5 training sessions led</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;margin-bottom:16px;">
+                            <img src="https://via.placeholder.com/48" alt="Champion Avatar" style="border-radius:50%;border:2px solid gold;margin-right:12px;">
+                            <div>
+                                <strong>Jordan Lee</strong> <span style="color:#888;">(Engagement)</span><br>
+                                <span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Engagement Star <span style="font-size:1.1em;">✨⬆️</span></span><br>
+                                <span style="color:#e67e22;font-weight:bold;">+15% participation</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Center Column: Teams -->
+                    <div style="flex:1;min-width:220px;padding:8px 16px;text-align:center;">
+                        <h3 style="color:#b7950b;">Teams</h3>
+                        <img src="https://via.placeholder.com/64x32" alt="Team Logo" style="margin-bottom:8px;">
+                        <div style="font-weight:bold;color:#2980b9;margin-bottom:8px;">SOC Analysts improved detection accuracy by 12%</div>
+                        <div style="background:#f1c40f;border-radius:8px;height:16px;width:100%;margin-bottom:8px;">
+                            <div style="background:#2980b9;height:16px;border-radius:8px;width:80%;"></div>
+                        </div>
+                        <span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Collaboration Champion <span style="font-size:1.1em;">🤝</span></span>
+                    </div>
+                    <!-- Right Column: Leaders & Culture -->
+                    <div style="flex:1;min-width:220px;padding:8px 16px;">
+                        <h3 style="color:#b7950b;">Leaders & Culture</h3>
+                        <div style="margin-bottom:8px;">
+                            <strong>Maria Lopez</strong> <span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Engagement Star <span style="font-size:1.1em;">✨⬆️</span></span>
+                        </div>
+                        <div style="margin-bottom:8px;">
+                            <strong>Chris Wang</strong> <span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.9em;">Compliance Guardian <span style="font-size:1.1em;">🔒✔️</span></span>
+                        </div>
+                        <div style="margin-bottom:8px;">
+                            <strong>Department Participation</strong>
+                            <div style="height:16px;width:100%;background:#eaf6ff;border-radius:8px;margin-top:4px;">
+                                <div style="background:#e67e22;height:16px;border-radius:8px;width:70%;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;font-style:italic;color:#888;">“Security is everyone’s responsibility”</div>
+                    </div>
+                </div>
+                <!-- Footer Strip -->
+                <div style="margin-top:24px;padding:8px 0;border-top:2px solid #f1c40f;display:flex;align-items:center;justify-content:space-between;">
+                    <div style="font-size:0.95em;color:#888;">Rotating quarterly highlights: Alex Kim, SOC Analysts, Maria Lopez, etc.</div>
+                    <div style="font-size:1.2em;color:#b7950b;font-weight:bold;display:flex;align-items:center;">
+                        <span style="font-size:1.5em;margin-right:8px;">🏆</span> Quarterly Champion: <span style="color:gold;margin-left:8px;">Quarterly Titan</span>
+                    </div>
+                </div>
+            </div>
+        <div class="panel" style="background:#fffbe6;border:2px solid #f1c40f;margin-bottom:30px;box-shadow:0 2px 8px #f1c40f;border-radius:8px;padding:24px;">
+            <h2 style="color:#b7950b;margin-bottom:12px;">🌟 Recognition Spotlight – Q1 2026</h2>
+            <ul style="font-size:1.05em;">
+                <li><strong>Security Champions Team:</strong> Special thanks to our Champions across departments who consistently reported suspicious activity and helped raise awareness. Your leadership has set the tone for vigilance.<br>
+                    <em>Template:</em> Champions across departments reported X suspicious activities and led Y awareness sessions.<br>
+                    <em>Standout:</em> [Insert Name] led peer training, boosting participation by 20% in their unit.
+                </li>
+                <li><strong>IT & SOC Analysts:</strong> Your quick response to threats and dedication to refining detection accuracy ensured our systems stayed resilient and compliant.<br>
+                    <em>Template:</em> Improved detection accuracy by Z%, reduced false positives by N incidents.<br>
+                    <em>Collaboration:</em> Partnered with Compliance to refine suppression lists.
+                </li>
+                <li><strong>Department Leaders:</strong> By encouraging participation and reinforcing best practices, you’ve helped embed security into everyday workflows.<br>
+                    <em>Template:</em> Encouraged participation, resulting in a +X% rise in reporting rates.<br>
+                    <em>Spotlight:</em> [Insert Department] exceeded expectations.
+                </li>
+                <li><strong>Individual Highlight:</strong> [Insert Name] went above and beyond by leading a peer‑to‑peer training session, boosting participation rates in their department by 20%.
+                    <em>Template:</em> Led peer training, boosting participation by X% in their unit.
+                </li>
+            </ul>
+            <div style="margin-top:16px;font-size:1.1em;color:#b7950b;font-weight:bold;">Your efforts are the backbone of our resilience — thank you for leading the way.</div>
+            <div style="margin-top:16px;font-size:0.95em;color:#888;">🔄 <strong>Quarterly Rotation Tips:</strong> Swap in new names and fresh metrics each quarter. Keep structure consistent. Use one collective win + one individual highlight per category. End with a motivational line.</div>
+        </div>
+    <h1>Email Engine Dashboard</h1>
+    <div class="panel" style="background:#eaf6ff;border:2px solid #2980b9;margin-bottom:30px;position:relative;">
+        <span id="townHallIcon" style="position:absolute;top:16px;right:16px;font-size:1.5em;cursor:pointer;color:#2980b9;" title="Town Hall Notes">🎤</span>
+        <div id="townHallPopover" style="display:none;position:absolute;top:40px;right:16px;width:340px;background:#fff;border:1px solid #2980b9;border-radius:8px;box-shadow:0 2px 8px #2980b9;padding:16px;z-index:10;">
+            <strong>Town Hall Script – Quishing Challenge (Q1 2026)</strong>
+            <p style="font-size:0.95em;margin-top:8px;">Good afternoon everyone. I want to take a moment to celebrate what we’ve achieved together in the first quarter of 2026. Our Quishing Challenge program has delivered strong results: detection accuracy is higher than ever, deliverability remains excellent, and we are fully compliant with global standards like SPF, DKIM, and DMARC.<br><br>But beyond the technical wins, what really stands out is the culture we’re building. Participation rates have risen across departments, showing that security is becoming part of our everyday mindset. Our Security Champions deserve special recognition — you’ve led by example, inspired your peers, and helped us stay vigilant against evolving threats.<br><br>We’ve also strengthened our infrastructure, ensuring resilience and protecting our sender reputation. This means our systems are not only secure but also scalable, ready to handle the demands of tomorrow.<br><br>Looking ahead to next quarter, our priorities are clear: expand our training datasets to sharpen detection, refine compliance layers to keep us aligned globally, boost engagement with new gamification and recognition, and scale infrastructure to stay ahead of the curve.<br><br>Together, we’re proving that security isn’t just a technical requirement — it’s a shared responsibility and a source of pride. Thank you for your commitment, your energy, and your leadership. Let’s carry this momentum forward and make Q2 even stronger.</p>
+        </div>
+        <script>
+        document.getElementById('townHallIcon').onclick = function() {
+            var pop = document.getElementById('townHallPopover');
+            pop.style.display = pop.style.display === 'none' ? 'block' : 'none';
+        };
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#townHallIcon') && !e.target.closest('#townHallPopover')) {
+                document.getElementById('townHallPopover').style.display = 'none';
+            }
+        });
+        </script>
+        <h2 style="color:#2980b9;">Executive Summary – Quishing Challenge (Q1 2026)</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="color:#2980b9;font-weight:bold;">🛡 Detection Accuracy ↑</span>
+            <span style="color:#2980b9;font-weight:bold;">✉ Deliverability 98%</span>
+            <span style="color:#f39c12;font-weight:bold;">🏅 Compliance Aligned</span>
+            <span style="color:#27ae60;font-weight:bold;">📈 Participation ↑</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="color:#27ae60;">⬆️ Detection Accuracy Improving</span>
+            <span style="color:#27ae60;">📊 Department Contributions Rising</span>
+            <span style="color:#27ae60;">📈 Blocklist Expansion – Threats Neutralized</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="color:#f39c12;">🏅 SPF/DKIM/DMARC Alignment</span>
+            <span style="color:#ffd700;">🏆 Security Champions Recognized</span>
+            <span style="color:#27ae60;">👥 Participation Rates ↑</span>
+        </div>
+        <div style="border-top:1px solid #ccc;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;">
+            <span style="color:#2980b9;">Expand dataset</span>
+            <span style="color:#f39c12;">Refine compliance layer</span>
+            <span style="color:#27ae60;">Boost engagement</span>
+            <span style="color:#2980b9;">Scale infrastructure</span>
+        </div>
+        <p style="margin-top:10px;">In Q1 2026, the Quishing Challenge program delivered strong results across detection accuracy, compliance, and cultural engagement. Our infrastructure achieved high deliverability and sender reputation through strict adherence to SPF, DKIM, and DMARC standards, while suppression list management and unsubscribe handling ensured global compliance. Participation rates rose steadily across departments, supported by gamification and recognition of Security Champions. Looking ahead, we will expand training datasets, refine compliance layers, and scale infrastructure to sustain momentum and further strengthen organizational resilience against Quishing threats.</p>
+        <button onclick="exportSummary('html')">Export as HTML</button>
+        <button onclick="exportSummary('pdf')">Export as PDF</button>
+    </div>
+    <div style="margin-bottom:20px;">
+        <button onclick="oauthLogin()">Login with OAuth</button>
+        <label>Theme:
+            <select id="themeSwitcher" onchange="switchTheme()">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </label>
+        <label>Layout:
+            <select id="layoutSwitcher" onchange="switchLayout()">
+                <option value="grid">Grid</option>
+                <option value="stacked">Stacked</option>
+            </select>
+        </label>
+    </div>
+    <div class="panel">
+        <h2>Analytics</h2>
+        <div class="filters">
+            <label>Date Range: <input type="date" id="startDate"> - <input type="date" id="endDate"></label>
+            <label>Event Type:
+                <select id="eventType">
+                    <option value="all">All</option>
+                    <option value="sent">Sent</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="opens">Opens</option>
+                    <option value="clicks">Clicks</option>
+                    <option value="bounces">Bounces</option>
+                    <option value="unsubscribes">Unsubscribes</option>
+                </select>
+            </label>
+            <button onclick="updateAnalytics()">Apply</button>
+        </div>
+        <canvas id="analyticsChart" width="400" height="150"></canvas>
+        <div id="analytics"></div>
+    </div>
+    <div class="panel">
+        <h2>Engagement Metrics</h2>
+        <div class="filters">
+            <label>Date Range: <input type="date" id="engStartDate"> - <input type="date" id="engEndDate"></label>
+            <button onclick="updateEngagement()">Apply</button>
+        </div>
+        <canvas id="engagementChart" width="400" height="150"></canvas>
+        <div id="engagement"></div>
+    </div>
+    <div class="panel">
+        <h2>Bounce Stats</h2>
+        <div id="bounce"></div>
+    </div>
+    <div class="panel">
+        <h2>Suppression List</h2>
+        <div id="suppression"></div>
+    </div>
+    <div class="panel">
+        <h2>Queue Health</h2>
+        <div id="queue"></div>
+    </div>
+    <div class="panel">
+        <h2>Deliverability Score</h2>
+        <div id="deliverability"></div>
+    </div>
+    <div class="panel">
+        <h2>Tracking Metrics</h2>
+        <div id="tracking"></div>
+    </div>
+        <div class="panel">
+            <h2>Advanced Metrics</h2>
+            <canvas id="deviceChart" width="400" height="150"></canvas>
+            <canvas id="geoChart" width="400" height="150"></canvas>
+            <canvas id="deliverabilityChart" width="400" height="150"></canvas>
+            <div id="advanced-metrics"></div>
+        </div>
+        <div class="panel">
+            <h2>User Management</h2>
+            <button onclick="addUserPrompt()">Add User</button>
+            <div id="user-panel"></div>
+        </div>
+            <div class="panel">
+                <h2>Email Reputation</h2>
+                <div id="reputation"></div>
+            </div>
+            <div class="panel">
+                <h2>Compliance</h2>
+                <div id="compliance"></div>
+            </div>
+            <div class="panel">
+                <h2>Observability</h2>
+                <div id="observability"></div>
+            </div>
+                <div class="panel">
+                    <h2>Threat Intelligence</h2>
+                    <div id="threat-intel-panel"></div>
+                </div>
+                <div class="panel">
+                    <h2>Audit Logs</h2>
+                    <div id="audit-logs-panel"></div>
+                </div>
+                <div class="panel">
+                    <h2>Predictive Analytics</h2>
+                    <canvas id="predictiveTrendChart" width="400" height="150"></canvas>
+                    <div id="predictive-analytics-panel"></div>
+                </div>
+
+                <!-- Sprint 28 Dashboard Status Snapshot & Q&A Cheat Sheet Panel -->
+                <div class="panel" style="background:#eaf6ff;border:2px solid #2980b9;margin-bottom:30px;border-radius:8px;padding:24px;">
+                    <h2 style="color:#2980b9;">Sprint 28 Dashboard Status Snapshot</h2>
+                    <ul style="font-size:1.05em;">
+                        <li><strong style="color:#27ae60;">Green (Completed):</strong>
+                            <ul>
+                                <li>Facilitator Toolkit finalized</li>
+                                <li>Exercise Outline ready</li>
+                                <li>Kanban Templates bundled</li>
+                                <li>Icon Files prepared</li>
+                            </ul>
+                        </li>
+                        <li><strong style="color:#f39c12;">Amber (Pending):</strong>
+                            <ul>
+                                <li>Polished PPT design still in progress</li>
+                                <li>Delivery reminder/escalation sent</li>
+                            </ul>
+                        </li>
+                        <li><strong style="color:#e74c3c;">Red (Blocked):</strong>
+                            <ul>
+                                <li>Dashboard launch dependent on PPT delivery</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div style="margin-top:16px;font-size:1.1em;color:#2980b9;font-weight:bold;">Backup Talking Points (assertive):</div>
+                    <ul style="font-size:1.05em;">
+                        <li>“The delay was due to design polish only — all core materials were completed and bundled on time. I’ve already escalated directly to the owner to secure delivery today.”</li>
+                        <li>“We have a contingency wireframe version ready, so the dashboard launch is not at risk. Leadership visibility is in place, and I’m driving closure to keep us on schedule.”</li>
+                    </ul>
+                    <hr style="margin:24px 0;">
+                    <h2 style="color:#2980b9;">Sprint 28 Q&A Cheat Sheet</h2>
+                    <ul style="font-size:1.05em;">
+                        <li><strong>Q: Why was the polished PPT delayed?</strong><br>
+                            <span style="color:#888;">A: The delay was limited to design polish only. All core materials were completed and bundled on time. I escalated directly to the owner and secured delivery today.</span>
+                        </li>
+                        <li><strong>Q: Is the dashboard launch at risk?</strong><br>
+                            <span style="color:#888;">A: No — we have a contingency wireframe version ready. The dashboard can go live as scheduled once the polished PPT is handed off.</span>
+                        </li>
+                        <li><strong>Q: How are you ensuring accountability?</strong><br>
+                            <span style="color:#888;">A: Leadership visibility is already in place. I’ve issued a final escalation and set a hard deadline. I’ll close the loop with a success acknowledgment once delivery is confirmed.</span>
+                        </li>
+                        <li><strong>Q: What’s the impact if the PPT isn’t delivered today?</strong><br>
+                            <span style="color:#888;">A: Minimal — the dashboard can launch with the wireframe version. The polished PPT will follow immediately after, so there’s no disruption to readiness activities.</span>
+                        </li>
+                    </ul>
+                    <hr style="margin:24px 0;">
+                    <div style="font-size:1.1em;color:#2980b9;font-weight:bold;">Closing Statement:</div>
+                    <div style="margin-top:8px;font-size:1.05em;color:#2980b9;">
+                        In summary, Sprint 28 deliverables are complete, with only the polished PPT pending final handoff today. We have contingencies in place, so the dashboard launch remains on track and fully supported.<br>
+                        I’ll ensure leadership receives the final package immediately upon delivery, and we’re positioned to move forward without disruption.
+                    </div>
+                    <div style="margin-top:24px;">
+                        <button onclick="exportSprint28Status('html')">Export as HTML</button>
+                        <button onclick="exportSprint28Status('pdf')">Export as PDF</button>
+                    </div>
+                </div>
+                    <script>
+                    function exportSprint28Status(fmt) {
+                        const url = `/api/export-sprint28-status/${fmt}`;
+                        if (fmt === 'html') {
+                            fetch(url)
+                                .then(resp => resp.text())
+                                .then(html => {
+                                    const blob = new Blob([html], {type: 'text/html'});
+                                    const link = document.createElement('a');
+                                    link.href = URL.createObjectURL(blob);
+                                    link.download = 'Sprint28_Status_Snapshot.html';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                });
+                        } else if (fmt === 'pdf') {
+                            fetch(url)
+                                .then(resp => resp.blob())
+                                .then(pdf => {
+                                    const link = document.createElement('a');
+                                    link.href = URL.createObjectURL(pdf);
+                                    link.download = 'Sprint28_Status_Snapshot.pdf';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                });
+                        }
+                    }
+                    </script>
+                <div class="panel">
+                    <h2>Custom Alerts</h2>
+                    <div id="custom-alerts-panel"></div>
+                    <button onclick="exportPanel('custom-alerts')">Export Alerts</button>
+                </div>
+    <div class="panel">
+        <h2>Anomaly Detection</h2>
+        <canvas id="anomalyTrendChart" width="400" height="150"></canvas>
+        <div id="anomaly-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>Workflow Automation</h2>
+        <div id="workflow-panel"></div>
+        <button onclick="runWorkflow()">Run Workflow</button>
+    </div>
+    <div class="panel">
+        <h2>Advanced Analytics</h2>
+        <canvas id="analyticsTrendChart" width="400" height="150"></canvas>
+        <div id="analytics-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>Risk Scoring</h2>
+        <canvas id="riskTrendChart" width="400" height="150"></canvas>
+        <div id="risk-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>Compliance Trends</h2>
+        <canvas id="complianceTrendChart" width="400" height="150"></canvas>
+        <div id="compliance-trends-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>User Activity</h2>
+        <canvas id="userActivityTrendChart" width="400" height="150"></canvas>
+        <div id="user-activity-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>External Integrations</h2>
+        <div id="external-integration-panel"></div>
+        <button onclick="syncExternalServices()">Sync Services</button>
+    </div>
+    <div class="panel">
+        <h2>Custom Metrics</h2>
+        <canvas id="customMetricsChart" width="400" height="150"></canvas>
+        <div id="custom-metrics"></div>
+    </div>
+    <div class="panel">
+        <h2>Device Analytics</h2>
+        <canvas id="deviceTrendChart" width="400" height="150"></canvas>
+        <div id="device-analytics-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>Geo Heatmap</h2>
+        <div id="geo-heatmap-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>Escalation Workflow</h2>
+        <div id="escalation-workflow-panel"></div>
+        <button onclick="triggerEscalation()">Trigger Escalation</button>
+    </div>
+    <div class="panel">
+        <h2>Compliance Audit</h2>
+        <div id="compliance-audit-panel"></div>
+    </div>
+    <div class="panel">
+        <h2>External API Integrations</h2>
+        <div id="external-api-panel"></div>
+        <button onclick="syncExternalAPIs()">Sync APIs</button>
+    </div>
+    <script>
+        function switchTheme() {
+            const theme = document.getElementById('themeSwitcher').value;
+            if (theme === 'dark') {
+                document.body.style.background = '#222';
+                document.body.style.color = '#eee';
+                document.querySelectorAll('.panel').forEach(p => p.style.background = '#333');
+            } else {
+                document.body.style.background = '#fff';
+                document.body.style.color = '#222';
+                document.querySelectorAll('.panel').forEach(p => p.style.background = '#fff');
+            }
+        }
+        function switchLayout() {
+            const layout = document.getElementById('layoutSwitcher').value;
+            const panels = document.querySelectorAll('.panel');
+            if (layout === 'grid') {
+                panels.forEach(p => p.style.display = 'inline-block');
+            } else {
+                panels.forEach(p => p.style.display = 'block');
+            }
+        }
+        function fetchAndRender(url, elementId, chartId, chartConfig, params) {
+            let query = '';
+            if (params) {
+                query = '?' + Object.entries(params).map(([k,v]) => `${k}=${v}`).join('&');
+            }
+            fetch(url + query)
+                .then(resp => resp.json())
+                .then(data => {
+                    document.getElementById(elementId).innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    if (chartId && chartConfig) {
+                        const ctx = document.getElementById(chartId).getContext('2d');
+                        new Chart(ctx, chartConfig(data));
+                    }
+                });
+        }
+        function updateAnalytics() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            const eventType = document.getElementById('eventType').value;
+            fetchAndRender('/api/analytics', 'analytics', 'analyticsChart', function(data) {
+                return {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sent', 'Delivered', 'Opens', 'Clicks', 'Bounces', 'Unsubscribes'],
+                        datasets: [{
+                            label: 'Analytics',
+                            data: [data.sent, data.delivered, data.opens, data.clicks, data.bounces, data.unsubscribes],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        }]
+                    }
+                };
+            }, {start, end, eventType});
+        }
+        function updateEngagement() {
+            const start = document.getElementById('engStartDate').value;
+            const end = document.getElementById('engEndDate').value;
+            fetchAndRender('/api/engagement', 'engagement', 'engagementChart', function(data) {
+                return {
+                    type: 'pie',
+                    data: {
+                        labels: ['Open Rate', 'Click Rate', 'Bounce Rate', 'Unsubscribe Rate'],
+                        datasets: [{
+                            label: 'Engagement',
+                            data: [data.open_rate, data.click_rate, data.bounce_rate, data.unsubscribe_rate],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(153, 102, 255, 0.5)'
+                            ]
+                        }]
+                    }
+                };
+            }, {start, end});
+        }
+        function autoRefresh() {
+            updateAnalytics();
+            updateEngagement();
+            fetchAndRender('/api/bounce_stats', 'bounce');
+            fetchAndRender('/api/suppression_list', 'suppression');
+            fetchAndRender('/api/queue_health', 'queue');
+            fetchAndRender('/api/deliverability_score', 'deliverability');
+            fetchAndRender('/api/tracking_metrics', 'tracking');
+                fetchAndRender('/api/advanced-metrics', 'advanced-metrics', null, null);
+                updateAdvancedMetrics();
+                updateUsers();
+                fetchAndRender('/api/reputation', 'reputation');
+                fetchAndRender('/api/compliance', 'compliance');
+                fetchAndRender('/api/observability', 'observability');
+                fetchAndRender('/api/threat-intel', 'threat-intel');
+                fetchAndRender('/api/sla', 'sla');
+                fetchAndRender('/api/custom-alerts', 'custom-alerts');
+                updateVolumeTrends();
+        }
+            function updateVolumeTrends() {
+                fetch('/api/volume-trends')
+                    .then(res => res.json())
+                    .then(data => {
+                        const ctx = document.getElementById('volumeTrendsChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+                                datasets: [{
+                                    label: 'Daily Volume',
+                                    data: data.daily,
+                                    borderColor: '#36A2EB',
+                                    fill: false
+                                }]
+                            }
+                        });
+                    });
+            }
+            function updateAdvancedMetrics() {
+                fetch('/api/advanced-metrics')
+                    .then(res => res.json())
+                    .then(data => {
+                        // Device chart
+                        const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+                        new Chart(deviceCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: Object.keys(data.device),
+                                datasets: [{
+                                    label: 'Device Distribution',
+                                    data: Object.values(data.device),
+                                    backgroundColor: ['#36A2EB', '#FF6384']
+                                }]
+                            }
+                        });
+                        // Geo chart
+                        const geoCtx = document.getElementById('geoChart').getContext('2d');
+                        new Chart(geoCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: Object.keys(data.geo),
+                                datasets: [{
+                                    label: 'Geo Distribution',
+                                    data: Object.values(data.geo),
+                                    backgroundColor: ['#FFCE56', '#4BC0C0', '#9966FF']
+                                }]
+                            }
+                        });
+                            // Bounce Rate by Region
+                            if (data.bounce_by_region) {
+                                document.getElementById('advanced-metrics').innerHTML += '<h4>Bounce Rate by Region</h4>';
+                                for (const region in data.bounce_by_region) {
+                                    document.getElementById('advanced-metrics').innerHTML += `${region}: ${data.bounce_by_region[region]}%<br>`;
+                                }
+                            }
+                            // Group by Incident Type
+                            if (data.incident_types) {
+                                document.getElementById('advanced-metrics').innerHTML += '<h4>Incidents by Type</h4>';
+                                for (const type in data.incident_types) {
+                                    document.getElementById('advanced-metrics').innerHTML += `${type}: ${data.incident_types[type]}<br>`;
+                                }
+                            }
+                            // Median Resolution Time
+                            if (data.median_resolution_time) {
+                                document.getElementById('advanced-metrics').innerHTML += `<h4>Median Resolution Time</h4>${data.median_resolution_time} min<br>`;
+                            }
+                        // Deliverability trend chart
+                        const delivCtx = document.getElementById('deliverabilityChart').getContext('2d');
+                        new Chart(delivCtx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4'],
+                                datasets: [{
+                                    label: 'Deliverability %',
+                                    data: data.deliverability,
+                                    borderColor: '#2c3e50',
+                                    fill: false
+                                }]
+                            }
+                        });
+                    });
+            }
+            function updateUsers() {
+                fetch('/api/users')
+                    .then(res => res.json())
+                    .then(users => {
+                            let html = '<table><tr><th>ID</th><th>Name</th><th>Role</th><th>Actions</th></tr>';
+                            users.forEach(u => {
+                                html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.role}</td><td>
+                                    <button onclick="editUserPrompt(${u.id})">Edit</button>
+                                    <button onclick="deleteUser(${u.id})">Delete</button>
+                                </td></tr>`;
+                            });
+                            html += '</table>';
+                            document.getElementById('user-panel').innerHTML = html;
+                    });
+                }
+                function editUserPrompt(id) {
+                    fetch('/api/users')
+                        .then(res => res.json())
+                        .then(users => {
+                            const user = users.find(u => u.id === id);
+                            const name = prompt('Edit user name:', user.name);
+                            const role = prompt('Edit user role:', user.role);
+                            if (name && role) {
+                                fetch('/api/users', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({id, name, role, edit: true})
+                                }).then(() => updateUsers());
+                            }
+                        });
+                }
+                function deleteUser(id) {
+                    fetch('/api/users', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({id, delete: true})
+                    }).then(() => updateUsers());
+            }
+            function addUserPrompt() {
+                const name = prompt('Enter user name:');
+                const role = prompt('Enter user role:');
+                if (name && role) {
+                    fetch('/api/users', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({id: Date.now(), name, role})
+                    }).then(() => updateUsers());
+                }
+            }
+        // Initial load
+        autoRefresh();
+        setInterval(autoRefresh, 10000); // Refresh every 10 seconds
+    </script>
+</body>
+</html>

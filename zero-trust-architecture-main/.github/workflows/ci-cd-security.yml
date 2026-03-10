@@ -1,0 +1,38 @@
+name: CI/CD Security & Notification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install bandit safety
+      - name: Run Bandit security scan
+        run: |
+          bandit -r .
+      - name: Run Safety vulnerability check
+        run: |
+          safety check
+
+  notify:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification on failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: 'CI/CD security scan failed for ${{ github.repository }}'

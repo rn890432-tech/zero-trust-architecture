@@ -1,0 +1,62 @@
+Sprint 28 Leadership + SOC Readiness Pack
+
+Header Banner (Top):
+Dark blue background, bold white text: “Sprint 28 Leadership + SOC Readiness Pack”
+Company logo (left), tagline in gold accent (right): “Compliance → Culture | Automation → Reliability | Engagement → Excellence”
+
+Top Row (Two Boxes Side by Side):
+
+Executive Alignment (Left Box)
+- Dashboard Rollout: Real‑time compliance, automation, engagement metrics
+- Impact & Alignment: Vigilance against phishing, roadmap milestones
+- Closing & Next Steps: Leadership sign‑off, training rollout, Sprint 29 prep
+
+Tabletop Exercise — “The Phantom Signature” (Right Box)
+- Theme: Microsoft + DocuSign OAuth phishing
+- Duration: 60–90 minutes
+- Phases: 1. Initial Delivery ✉️ | 2. Credential Capture 🔑 | 3. Lateral Movement 🔄 | 4. Infrastructure Review 🌐 | 5. Executive Escalation 💼
+
+Bottom Row (Two Boxes Side by Side):
+
+Kanban Integration (Left Box)
+- Inject phases mapped to tasks
+- Columns: Injects | Blue Team | Red Team | Evaluation | Debrief
+- Scoring rubric card (Detection, Technical Depth, Containment, Communication, Strategic Thinking, Executive Briefing)
+
+Facilitator Toolkit (Right Box)
+- Quick‑reference sheet (injects, prompts, responses)
+- Scoring rubric card (1–5 scale)
+- Timeline chart (visual roadmap)
+- Debrief prompts (missed signals, automation, OAuth monitoring, training gaps)
+
+Footer Banner (Bottom):
+Dark gray background, bold white text: “Together, we turn compliance into culture, automation into reliability, and engagement into excellence.”
+
+Design Notes:
+- Consistent sans‑serif font (Segoe UI, Calibri, Arial)
+- Flat icons, accent colors per section
+- High contrast (white text on dark, dark text on light)
+- Uniform padding for balance
+- Limit text to 3–5 bullets per section
+
+Icon Recommendations:
+- Dashboard: fa-chart-bar
+- Shield: fa-shield-alt
+- Board: fa-columns
+- Target: fa-bullseye
+- Email: fa-envelope
+- Key: fa-key
+- Arrows: fa-exchange-alt
+- Globe: fa-globe
+- Briefcase: fa-briefcase
+- Checklist: fa-check-square
+
+Color Palette:
+- Header: #003366, #FFD700
+- Executive Alignment: #F2F2F2, #1E90FF
+- Tabletop Exercise: #008080, #00CED1
+- Kanban Integration: #FF8C00, #FF4500
+- Facilitator Toolkit: #228B22, #32CD32
+- Footer: #2F4F4F, #FFFFFF
+
+For full deck, exercise outline, facilitator toolkit, and icon files, see attached bundle or request specific formats (PPTX, Google Slides, SVG/PNG icons).

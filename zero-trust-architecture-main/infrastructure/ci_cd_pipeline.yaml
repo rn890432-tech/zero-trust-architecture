@@ -1,0 +1,23 @@
+# CI/CD Pipeline for SOC Platform
+name: soc-platform-ci-cd
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker images
+        run: docker build -t soc-dashboard-backend ./soc_dashboard/backend
+      - name: Build frontend
+        run: cd soc_dashboard/frontend && npm install && npm run build
+      - name: Push images to registry
+        run: echo "Push to registry step here"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Kubernetes
+        run: echo "kubectl apply -f infrastructure/k8s_manifests.yaml"

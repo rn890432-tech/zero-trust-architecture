@@ -1,0 +1,31 @@
+# PagerDuty integration
+pagerduty_routing_key: "${PAGERDUTY_ROUTING_KEY}"
+pagerduty_source: "ZeroTrustAutomation"
+
+# GitHub integration
+github_repo_owner: "your-org"
+github_repo_name: "your-repo"
+github_token: "${GITHUB_TOKEN}"
+# Sample configuration for Zero Trust Automation
+from: "alerts@yourdomain.com"
+smtp_server: "smtp.yourdomain.com"
+credential_target: "ZeroTrustSmtpCreds"
+admin_email: "admin@yourdomain.com"
+archive_dir: "./archives"
+slack_webhook_url: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+teams_webhook_url: "https://outlook.office.com/webhook/XXX/YYY/ZZZ"
+jira_url: "https://yourcompany.atlassian.net"
+jira_project_key: "SEC"
+jira_issue_type: "Task"
+jira_username: "jirauser@yourdomain.com"
+jira_api_token: "${JIRA_API_TOKEN}"
+servicenow_url: "https://yourcompany.service-now.com"
+servicenow_username: "svcnowuser"
+servicenow_password: "${SERVICENOW_PASSWORD}"
+splunk_hec_url: "https://splunk.yourcompany.com:8088/services/collector"
+splunk_hec_token: "${SPLUNK_HEC_TOKEN}"
+azure_blob_connection_string: "${AZURE_BLOB_CONN}"
+azure_blob_container: "zerotrust-reports"
+s3_bucket: "your-s3-bucket"
+s3_key_prefix: "zerotrust/reports"
+google_drive_upload: false

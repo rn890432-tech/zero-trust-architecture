@@ -1,0 +1,4 @@
+System,Patch,Status,DeployedOn
+Server01,KB5015807,Installed,2026-02-20
+Server02,KB5015807,Pending,2026-02-23
+Workstation01,KB5015807,Installed,2026-02-21

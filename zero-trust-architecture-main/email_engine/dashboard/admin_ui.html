@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Controls</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .panel { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        h2 { color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <h1>Admin Controls</h1>
+    <div class="panel">
+        <h2>API Keys</h2>
+        <div id="api_keys"></div>
+    </div>
+    <div class="panel">
+        <h2>Webhooks</h2>
+        <div id="webhooks"></div>
+    </div>
+    <div class="panel">
+        <h2>Roles</h2>
+        <div id="roles"></div>
+    </div>
+    <script>
+        // Example: Fetch and render admin data (simulate)
+        document.getElementById('api_keys').innerHTML = '<pre>key123, key456</pre>';
+        document.getElementById('webhooks').innerHTML = '<pre>http://webhook.com</pre>';
+        document.getElementById('roles').innerHTML = '<pre>user1: admin, user2: viewer</pre>';
+    </script>
+</body>
+</html>

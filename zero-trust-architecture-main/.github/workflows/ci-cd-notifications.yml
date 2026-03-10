@@ -1,0 +1,52 @@
+name: CI/CD Multi-Channel Notifications
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Dashboard Pipeline", "CI/CD Security & Notification"]
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set notification variables
+        run: |
+          echo "STATUS=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
+      - name: Notify Microsoft Teams
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          curl -H 'Content-Type: application/json' -d '{"text":"Pipeline ${{ github.event.workflow_run.name }} on branch ${{ github.event.workflow_run.head_branch }} ${{ github.event.workflow_run.conclusion }}. See details: ${{ github.event.workflow_run.html_url }}"}' ${{ secrets.TEAMS_WEBHOOK_URL }}
+      - name: Notify PagerDuty
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          curl -X POST -H 'Content-Type: application/json' -H 'Authorization: Token token=${{ secrets.PAGERDUTY_API_KEY }}' -d '{"service_key": "${{ secrets.PAGERDUTY_SERVICE_KEY }}", "event_type": "trigger", "description": "CI/CD pipeline failed for ${{ github.repository }}", "details": {"workflow": "${{ github.event.workflow_run.name }}", "branch": "${{ github.event.workflow_run.head_branch }}"}}' https://events.pagerduty.com/v2/enqueue
+      - name: Notify Discord
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          curl -H 'Content-Type: application/json' -d '{"content": "Pipeline ${{ github.event.workflow_run.name }} on branch ${{ github.event.workflow_run.head_branch }} ${{ github.event.workflow_run.conclusion }}. See details: ${{ github.event.workflow_run.html_url }}"}' ${{ secrets.DISCORD_WEBHOOK_URL }}
+      - name: Notify Twilio SMS
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          curl -X POST 'https://api.twilio.com/2010-04-01/Accounts/${{ secrets.TWILIO_ACCOUNT_SID }}/Messages.json' --data-urlencode 'To=${{ secrets.TWILIO_TO }}' --data-urlencode 'From=${{ secrets.TWILIO_FROM }}' --data-urlencode 'Body=CI/CD pipeline failed for ${{ github.repository }}. See details: ${{ github.event.workflow_run.html_url }}' -u ${{ secrets.TWILIO_ACCOUNT_SID }}:${{ secrets.TWILIO_AUTH_TOKEN }}
+      - name: Notify Custom Webhook
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          curl -H 'Content-Type: application/json' -d '{"status": "${{ github.event.workflow_run.conclusion }}", "workflow": "${{ github.event.workflow_run.name }}", "branch": "${{ github.event.workflow_run.head_branch }}", "url": "${{ github.event.workflow_run.html_url }}"}' ${{ secrets.CUSTOM_WEBHOOK_URL }}
+      - name: Aggregate summary notification
+        if: always()
+        run: |
+          curl -H 'Content-Type: application/json' -d '{"text": "Pipeline ${{ github.event.workflow_run.name }} on branch ${{ github.event.workflow_run.head_branch }} completed with status ${{ github.event.workflow_run.conclusion }}. See details: ${{ github.event.workflow_run.html_url }}"}' ${{ secrets.TEAMS_WEBHOOK_URL }}
+      - name: Notify on successful deployment
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        run: |
+          curl -H 'Content-Type: application/json' -d '{"text": "Deployment succeeded for ${{ github.repository }} on branch ${{ github.event.workflow_run.head_branch }}. See details: ${{ github.event.workflow_run.html_url }}"}' ${{ secrets.TEAMS_WEBHOOK_URL }}
+      - name: Auto-create Jira issue on failure
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          curl -u ${{ secrets.JIRA_USER }}:${{ secrets.JIRA_API_TOKEN }} -X POST --data '{"fields":{"project":{"key":"${{ secrets.JIRA_PROJECT_KEY }}"},"summary":"CI/CD pipeline failed for ${{ github.repository }}","description":"Workflow: ${{ github.event.workflow_run.name }}\nBranch: ${{ github.event.workflow_run.head_branch }}\nSee details: ${{ github.event.workflow_run.html_url }}","issuetype":{"name":"Bug"}}}' -H "Content-Type: application/json" ${{ secrets.JIRA_API_URL }}/rest/api/2/issue
+      - name: Auto-create ServiceNow incident on failure
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          curl -u ${{ secrets.SERVICENOW_USER }}:${{ secrets.SERVICENOW_API_TOKEN }} -X POST --data '{"short_description":"CI/CD pipeline failed for ${{ github.repository }}","description":"Workflow: ${{ github.event.workflow_run.name }}\nBranch: ${{ github.event.workflow_run.head_branch }}\nSee details: ${{ github.event.workflow_run.html_url }}"}' -H "Content-Type: application/json" ${{ secrets.SERVICENOW_API_URL }}/api/now/table/incident

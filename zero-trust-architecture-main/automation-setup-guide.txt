@@ -1,0 +1,33 @@
+# Windows Task Scheduler setup instructions for auto-archive-sign.sh
+
+1. Open Task Scheduler (Windows + R, type 'taskschd.msc', press Enter).
+2. Click 'Create Basic Task...'.
+3. Name: Zero Trust Archive Sign
+4. Trigger: Daily (choose time)
+5. Action: Start a Program
+   - Program/script: bash
+   - Add arguments: D:\zero-trust-architecture-main-all\auto-archive-sign.sh
+   - Start in: D:\zero-trust-architecture-main-all
+6. Finish and confirm.
+
+# For email notifications, backup rotation, and error alerts:
+
+## Email notifications (using PowerShell)
+Add this to your script after successful signing:
+
+powershell -Command "Send-MailMessage -To 'your@email.com' -From 'your@email.com' -Subject 'Archive Signed' -Body 'Archive and signature created: $ARCHIVE_NAME' -SmtpServer 'smtp.yourprovider.com'"
+
+## Backup rotation
+Add this to your script before archiving:
+
+find "$ARCHIVE_DIR" -name 'audit-*.tar.gz' -mtime +30 -exec rm {} \;
+find "$ARCHIVE_DIR" -name 'audit-*.tar.gz.sig' -mtime +30 -exec rm {} \;
+
+This deletes archives/signatures older than 30 days.
+
+## Error alerts
+Add this after any error log:
+
+powershell -Command "Send-MailMessage -To 'your@email.com' -From 'your@email.com' -Subject 'Archive Error' -Body 'Error occurred during archive/signing.' -SmtpServer 'smtp.yourprovider.com'"
+
+# Customize as needed for your email provider and preferences.

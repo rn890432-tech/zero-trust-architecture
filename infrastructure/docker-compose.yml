@@ -1,0 +1,115 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: soc
+      POSTGRES_USER: socadmin
+      POSTGRES_PASSWORD: socpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  auth_service:
+    build: ../backend/auth_service
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://socadmin:socpass@postgres:5432/soc
+    ports:
+      - "8001:8001"
+
+  api_gateway:
+    build: ../backend/api_gateway
+    depends_on:
+      - auth_service
+    ports:
+      - "8000:8000"
+
+  tenant_manager:
+    build: ../backend/tenant_manager
+    depends_on:
+      - postgres
+    ports:
+      - "8002:8002"
+
+  subscription_service:
+    build: ../backend/subscription_service
+    depends_on:
+      - postgres
+    ports:
+      - "8003:8003"
+
+  soc_dashboard:
+    build: ../frontend/soc_dashboard
+    ports:
+      - "3000:3000"
+
+  admin_console:
+    build: ../frontend/admin_console
+    ports:
+      - "3001:3001"
+
+  auth_portal:
+    build: ../frontend/auth_portal
+    ports:
+      - "3002:3002"
+
+  training_portal:
+    build: ../frontend/training_portal
+    ports:
+      - "3003:3003"
+
+volumes:
+  postgres_data:
+      - ../backend/attack_simulator:/app
+    depends_on:
+      - redis
+  backend_threat_intelligence:
+    build: ../backend/threat_intelligence
+    command: python ingestion_engine.py
+    volumes:
+      - ../backend/threat_intelligence:/app
+    depends_on:
+      - postgres
+  backend_ai_soc_reasoning:
+    build: ../backend/ai_soc_reasoning
+    command: python ai_engine.py
+    volumes:
+      - ../backend/ai_soc_reasoning:/app
+    depends_on:
+      - postgres
+  backend_attack_map:
+    build: ../backend/attack_map
+    command: python map_event_stream.py
+    volumes:
+      - ../backend/attack_map:/app
+    depends_on:
+      - redis
+  backend_incident_replay:
+    build: ../backend/incident_replay
+    command: python replay_engine.py
+    volumes:
+      - ../backend/incident_replay:/app
+    depends_on:
+      - postgres
+  backend_event_bus:
+    build: ../backend/event_bus
+    command: python event_stream.py
+    volumes:
+      - ../backend/event_bus:/app
+    depends_on:
+      - redis
+  websocket_server:
+    image: python:3.10
+    command: python -m websockets.server
+    ports:
+      - "8765:8765"
+    depends_on:
+      - backend_attack_map

@@ -261,4 +261,5 @@ For further customization, request code for specific backend endpoints, advanced
 # zero-trust-architecture
 #   z e r o - t r u s t - a r c h i t e c t u r e  
  #   z e r o - t r u s t - a r c h i t e c t u r e - m a i n - a l l  
+ #   z e r o - t r u s t - a r c h i t e c t u r e - m a i n - a l l  
  

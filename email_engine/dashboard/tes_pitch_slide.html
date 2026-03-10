@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transactional Email Service (TES) – SaaS‑Grade Reliability</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f6ff; color: #333; margin: 0; padding: 0; }
+        .slide { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #8e44ad33; padding: 32px; }
+        h1 { color: #8e44ad; margin-bottom: 24px; }
+        ul { margin-bottom: 24px; }
+        .roadmap { background: #f3e6ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+        .closing { color: #8e44ad; font-weight: bold; font-size: 1.1em; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <h1>🚀 Transactional Email Service (TES) – SaaS‑Grade Reliability</h1>
+        <ul>
+            <li><strong>What TES Delivers:</strong> Password resets, verification codes, receipts, onboarding, alerts, SOC/security notifications, app events.</li>
+            <li><strong>Why It Matters:</strong> Unlike marketing email, TES must be fast, reliable, audit‑friendly, compliant, and highly deliverable.</li>
+        </ul>
+        <div><strong>System Overview:</strong>
+            <ul>
+                <li>TES API Layer (REST/gRPC, tenant isolation)</li>
+                <li>Message Queue (Redis/SQS/RabbitMQ)</li>
+                <li>Email Worker/Dispatcher (validation, rate limits, failover SMTP)</li>
+                <li>Provider Integrations (SES, SendGrid, Mailgun, Postmark)</li>
+                <li>Database Layer (Postgres logs, templates, preferences)</li>
+                <li>Event Ingestion (bounces, complaints, opens, clicks)</li>
+                <li>Dashboard UI (logs, stats, template editor, API key mgmt)</li>
+            </ul>
+        </div>
+        <div class="roadmap">
+            <strong>Phased Roadmap:</strong>
+            <ul>
+                <li>Phase 1: Core Engine (SMTP pool, retry queue, bounce processor, logging DB)</li>
+                <li>Phase 2: Compliance Layer (preferences, suppression, rate limiting, IP warmup)</li>
+                <li>Phase 3: Advanced Features (tracking, analytics, SLA monitoring, dashboard modules)</li>
+            </ul>
+        </div>
+        <div class="closing">TES is our backbone for secure, compliant, and scalable communication — designed like a modern SaaS‑grade email engine.</div>
+    </div>
+</body>
+</html>

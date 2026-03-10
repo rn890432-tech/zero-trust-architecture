@@ -1,0 +1,31 @@
+# Sample command to run automate_report_and_email.ps1 successfully
+# This command provides all required parameters with safe defaults.
+
+pwsh -File automate_report_and_email.ps1 `
+  -To "admin@example.com" `
+  -From "admin@example.com" `
+  -Subject "Zero Trust Audit Report" `
+  -SmtpServer "smtp.example.com" `
+  -ReportPath "$PSScriptRoot\latest_report.html" `
+  -Date "2026-02-24" `
+  -Summary "All systems operational" `
+  -Details @(@{Check="Firewall"; Status="pass"; Details="No issues"}) `
+  -AdminEmail "admin@example.com" `
+  -ArchiveDir "$PSScriptRoot\archives" `
+  -MaxRetries 3 `
+  -RetryDelaySeconds 10
+
+# To make the script more forgiving, add default values for required parameters at the top of automate_report_and_email.ps1:
+
+if (-not $To) { $To = @("admin@example.com") }
+if (-not $From) { $From = "admin@example.com" }
+if (-not $Subject) { $Subject = "Zero Trust Audit Report" }
+if (-not $SmtpServer) { $SmtpServer = "smtp.example.com" }
+if (-not $ReportPath) { $ReportPath = "$PSScriptRoot\latest_report.html" }
+if (-not $Date) { $Date = (Get-Date -Format 'yyyy-MM-dd') }
+if (-not $Summary) { $Summary = "All systems operational" }
+if (-not $Details) { $Details = @(@{Check="Firewall"; Status="pass"; Details="No issues"}) }
+if (-not $AdminEmail) { $AdminEmail = "admin@example.com" }
+if (-not $ArchiveDir) { $ArchiveDir = "$PSScriptRoot\archives" }
+if (-not $MaxRetries) { $MaxRetries = 3 }
+if (-not $RetryDelaySeconds) { $RetryDelaySeconds = 10 }

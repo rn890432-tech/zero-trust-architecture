@@ -1,0 +1,121 @@
+# Kubernetes manifests for new SOC microservices
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: threat-intel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: threat-intel
+  template:
+    metadata:
+      labels:
+        app: threat-intel
+    spec:
+      containers:
+      - name: threat-intel
+        image: threat-intel:latest
+        ports:
+        - containerPort: 5001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: attack-graph
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: attack-graph
+  template:
+    metadata:
+      labels:
+        app: attack-graph
+    spec:
+      containers:
+      - name: attack-graph
+        image: attack-graph:latest
+        ports:
+        - containerPort: 5002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autonomous-defense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autonomous-defense
+  template:
+    metadata:
+      labels:
+        app: autonomous-defense
+    spec:
+      containers:
+      - name: autonomous-defense
+        image: autonomous-defense:latest
+        ports:
+        - containerPort: 5003
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dark-web-hunting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dark-web-hunting
+  template:
+    metadata:
+      labels:
+        app: dark-web-hunting
+    spec:
+      containers:
+      - name: dark-web-hunting
+        image: dark-web-hunting:latest
+        ports:
+        - containerPort: 5004
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: threat-actor-attribution
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: threat-actor-attribution
+  template:
+    metadata:
+      labels:
+        app: threat-actor-attribution
+    spec:
+      containers:
+      - name: threat-actor-attribution
+        image: threat-actor-attribution:latest
+        ports:
+        - containerPort: 5005
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: threat-hunting-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: threat-hunting-ai
+  template:
+    metadata:
+      labels:
+        app: threat-hunting-ai
+    spec:
+      containers:
+      - name: threat-hunting-ai
+        image: threat-hunting-ai:latest
+        ports:
+        - containerPort: 5006

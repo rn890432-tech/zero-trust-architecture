@@ -1,0 +1,4 @@
+Time,Event,Severity,Status
+08:30,SLA breach: Response delayed,Critical,Open
+09:45,SLA breach: Resolution missed,Warning,Closed
+11:00,SLA breach: Escalation required,Critical,Open

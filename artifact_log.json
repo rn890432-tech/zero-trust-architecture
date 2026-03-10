@@ -1,0 +1,10 @@
+[
+    {"artifact_id": "A001", "type": "pcap", "timestamp": "2026-03-04 09:15:00", "source": "Web Server", "description": "Network capture from web server incident."},
+    {"artifact_id": "A002", "type": "logfile", "timestamp": "2026-03-04 09:16:00", "source": "Endpoint", "description": "Endpoint security log."},
+    {"artifact_id": "A003", "type": "alert", "timestamp": "2026-03-04 09:17:00", "source": "Firewall", "description": "Firewall alert for suspicious traffic."},
+    {"artifact_id": "A004", "type": "email", "timestamp": "2026-03-04 09:18:00", "source": "Mail Gateway", "description": "Phishing email sample."},
+    {"artifact_id": "A005", "type": "pcap", "timestamp": "2026-03-04 09:19:00", "source": "Web Server", "description": "Second network capture."},
+    {"artifact_id": "A006", "type": "logfile", "timestamp": "2026-03-04 09:20:00", "source": "Endpoint", "description": "Endpoint log: malware detection."},
+    {"artifact_id": "A007", "type": "alert", "timestamp": "2026-03-04 09:21:00", "source": "Firewall", "description": "IDS alert: brute force attempt."},
+    {"artifact_id": "A008", "type": "email", "timestamp": "2026-03-04 09:22:00", "source": "Mail Gateway", "description": "Suspicious attachment detected."}
+]

@@ -1,0 +1,43 @@
+send_report:
+  stage: notify
+  image: python:3.9
+  script:
+    - pip install boto3
+    - |
+      python -c """
+      import boto3, os
+      ses = boto3.client('ses', region_name=os.getenv('SES_REGION'))
+      # ...rest of code...
+      """
+
+lint_code:
+  stage: test
+  image: python:3.9
+  script:
+    - pip install flake8
+    - flake8 .
+
+security_scan:
+  stage: test
+  image: python:3.9
+  script:
+    - pip install bandit safety
+    - bandit -r .
+    - safety check
+
+test_backend:
+  stage: test
+  image: python:3.9
+  script:
+    - pip install -r requirements.txt
+    - pytest tests/
+
+notify_failure:
+  stage: notify
+  image: curlimages/curl:latest
+  script:
+    - |
+      curl -H 'Content-Type: application/json' -d '{"text": "Pipeline $CI_PROJECT_NAME failed! See details: $CI_PIPELINE_URL"}' "$TEAMS_WEBHOOK_URL"
+  only:
+    - main
+  when: on_failure

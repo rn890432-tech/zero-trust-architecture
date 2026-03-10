@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Phishing Drill Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    .heatmap-cell { width: 80px; height: 40px; text-align: center; }
+    .leaderboard { margin-top: 2em; }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h2>Phishing Drill Dashboard</h2>
+    <table class="table table-bordered mt-3">
+      <thead><tr><th>Metric</th><th>Real-Time Value</th><th>Status</th></tr></thead>
+      <tbody id="drill-metrics"></tbody>
+    </table>
+    <h4>Department Heat Map</h4>
+    <div id="heatmap" class="mb-4"></div>
+    <h4>Drill Comparison</h4>
+    <div id="drill-comparison"></div>
+    <div class="leaderboard">
+      <h4>Reporting Leaderboard</h4>
+      <table class="table table-striped">
+        <thead><tr><th>Employee</th><th>Report Time</th><th>Status</th></tr></thead>
+        <tbody id="leaderboard"></tbody>
+      </table>
+    </div>
+    <button class="btn btn-danger mt-3" onclick="stopDrill()">Stop Drill Instantly</button>
+  </div>
+  <script>
+    async function fetchDrillStats() {
+      const res = await fetch('/api/admin/drill_stats');
+      const stats = await res.json();
+      // Metrics
+      const metrics = [
+        ['Total Targeted Users', stats.total_users, 'Active Drill'],
+        ['Initial Click Rate', stats.click_rate+'%', stats.click_status],
+        ['Credential Submission', stats.credential_submission+'%', stats.credential_status],
+        ['Average Report Time', stats.avg_report_time, stats.report_status],
+        ['Fisher Engine Detection', stats.fisher_detection+'%', stats.fisher_status]
+      ];
+      document.getElementById('drill-metrics').innerHTML = metrics.map(m => `<tr><td>${m[0]}</td><td>${m[1]}</td><td>${m[2]}</td></tr>`).join('');
+      // Heatmap
+      let heatmapHtml = '<table class="table"><tr>';
+      stats.departments.forEach(d => {
+        heatmapHtml += `<th>${d.name}</th>`;
+      });
+      heatmapHtml += '</tr><tr>';
+      stats.departments.forEach(d => {
+        heatmapHtml += `<td class="heatmap-cell" style="background:${d.color}">${d.vulnerability}%</td>`;
+      });
+      heatmapHtml += '</tr></table>';
+      document.getElementById('heatmap').innerHTML = heatmapHtml;
+      // Drill Comparison
+      document.getElementById('drill-comparison').innerHTML = `<b>Current Score:</b> ${stats.current_score} <br><b>Baseline:</b> ${stats.baseline_score}`;
+      // Leaderboard
+      document.getElementById('leaderboard').innerHTML = stats.leaderboard.map(e => `<tr><td>${e.name}</td><td>${e.report_time}</td><td>${e.status}</td></tr>`).join('');
+    }
+    fetchDrillStats();
+    function stopDrill() { fetch('/api/admin/stop_drill', {method:'POST'}).then(()=>alert('Drill stopped!')); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+Control,Status,Owner,LastChecked
+MFA Enabled,Compliant,Security Team,2026-02-22
+Data Encryption,Non-Compliant,IT Ops,2026-02-20
+Patch Management,Compliant,IT Ops,2026-02-21

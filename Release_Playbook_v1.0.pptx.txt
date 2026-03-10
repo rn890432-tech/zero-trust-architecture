@@ -1,0 +1,44 @@
+Release Playbook v1.0
+
+Slide 1: Title
+- Release Playbook v1.0
+- Our Release Rhythm
+
+Slide 2: Step 1 — Plan & Scope
+- Define objectives, deliverables, timelines
+- Identify stakeholders, dependencies
+
+Slide 3: Step 2 — Build & Integrate
+- Develop features, fixes, improvements
+- Integrate with systems/services
+
+Slide 4: Step 3 — Test & Validate
+- Automated/manual tests
+- Validate compliance, security, performance
+
+Slide 5: Step 4 — Document & Communicate
+- Update release notes, guides, docs
+- Communicate changes to stakeholders
+
+Slide 6: Step 5 — Deploy & Monitor
+- Deploy to production/target
+- Monitor for issues, confirm success
+
+Slide 7: Step 6 — Review & Improve
+- Gather feedback
+- Analyze outcomes, refine process
+
+Slide 8: Standards & Best Practices
+- Semantic versioning, conventional commits
+- Accessibility, compliance
+- Document workflows
+- Encourage feedback
+
+Slide 9: Feedback & Next Steps
+- Access Playbook: Slack, Teams, Confluence
+- Managers: Embed in sprint reviews
+- Share feedback for v1.1
+
+Slide 10: Contact & Links
+- Editable template (.pptx) and PDF attached
+- Google Slides link in Slack/Teams/Confluence

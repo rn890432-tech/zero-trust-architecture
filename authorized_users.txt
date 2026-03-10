@@ -1,0 +1,5 @@
+# username:password:department
+admin:adminpass:IT
+alice:alicepass:Finance
+bob:bobpass:HR
+carol:carolpass:Sales

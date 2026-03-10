@@ -1,0 +1,1 @@
+{"4977ec48-1240-4985-92de-eb533bfa548e": {"name": "TenantA", "api_keys": ["key123"], "webhooks": ["http://webhook.com"], "roles": {"user1": "admin"}}, "6eefdd2c-b1bd-4ad9-bfb0-3d0a29f3f130": {"name": "TenantA", "api_keys": ["key123"], "webhooks": ["http://webhook.com"], "roles": {"user1": "admin"}}}

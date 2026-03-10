@@ -1,0 +1,44 @@
+name: CI/CD Markdown Notification
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Dashboard Pipeline", "CI/CD Security & Notification"]
+    types:
+      - completed
+
+jobs:
+  notify_multichannel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set notification variables
+        run: |
+          echo "STATUS_ICON=✅" >> $GITHUB_ENV
+          if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then echo "STATUS_ICON=❌" >> $GITHUB_ENV; fi
+          echo "MSG_MD=### 🚨 Build Notification\n\nStatus: $STATUS_ICON Build ${{ github.event.workflow_run.conclusion }}\nProject: ${{ github.repository }}\nTimestamp: $(date -u)\n\nDetails:\n- Triggered by: @${{ github.actor }}\n- Environment: ${{ github.event.workflow_run.head_branch }}\n- Commit: ${{ github.event.workflow_run.head_sha }}\n\nLinks:\n- [Build Logs](${{ github.event.workflow_run.html_url }})\n- [Dashboard](https://example.com/dashboard/${{ github.repository }})\n- [Ticket #456](https://example.com/tickets/456)\n\nAttachments:\n- 📎 [Build Log (.txt)](https://example.com/artifacts/build-log.txt)\n- 📎 [Summary Report (.pdf)](https://example.com/artifacts/report.pdf)\n\nMentions:\n- @dev-team\n- @qa-team\n\n---" >> $GITHUB_ENV
+      - name: Notify Slack
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MSG_MD\"}" "$SLACK_WEBHOOK_URL"
+      - name: Notify Discord
+        run: |
+          curl -H 'Content-Type: application/json' -d "{\"content\": \"$MSG_MD\"}" "$DISCORD_WEBHOOK_URL"
+      - name: Notify Teams
+        run: |
+          curl -H 'Content-Type: application/json' -d "{\"text\":\"$MSG_MD\"}" "$TEAMS_WEBHOOK_URL"
+      - name: Notify Telegram
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" -d chat_id="$TELEGRAM_CHAT_ID" -d text="$MSG_MD"
+      - name: Notify WhatsApp (Twilio)
+        run: |
+          curl -X POST "https://api.twilio.com/2010-04-01/Accounts/$TWILIO_ACCOUNT_SID/Messages.json" --data-urlencode "To=$WHATSAPP_TO" --data-urlencode "From=$WHATSAPP_FROM" --data-urlencode "Body=$MSG_MD" -u $TWILIO_ACCOUNT_SID:$TWILIO_AUTH_TOKEN
+      - name: Notify Mattermost
+        run: |
+          curl -H 'Content-Type: application/json' -d "{\"text\":\"$MSG_MD\"}" "$MATTERMOST_WEBHOOK_URL"
+      - name: Create Jira Issue
+        run: |
+          curl -u $JIRA_USER:$JIRA_API_TOKEN -X POST --data "{\"fields\":{\"project\":{\"key\":\"$JIRA_PROJECT_KEY\"},\"summary\":\"Build ${{ github.event.workflow_run.conclusion }} for ${{ github.repository }}\",\"description\":\"$MSG_MD\",\"issuetype\":{\"name\":\"Bug\"}}}" -H "Content-Type: application/json" "$JIRA_API_URL/rest/api/2/issue"
+      - name: Create ServiceNow Incident
+        run: |
+          curl -u $SERVICENOW_USER:$SERVICENOW_API_TOKEN -X POST --data "{\"short_description\":\"Build ${{ github.event.workflow_run.conclusion }} for ${{ github.repository }}\",\"description\":\"$MSG_MD\"}" -H "Content-Type: application/json" "$SERVICENOW_API_URL/api/now/table/incident"
+      - name: Create Zendesk Ticket
+        run: |
+          curl -u $ZENDESK_USER:$ZENDESK_API_TOKEN -X POST --data "{\"ticket\":{\"subject\":\"Build ${{ github.event.workflow_run.conclusion }} for ${{ github.repository }}\",\"comment\":{\"body\":\"$MSG_MD\"}}}" -H "Content-Type: application/json" "$ZENDESK_API_URL/api/v2/tickets.json"

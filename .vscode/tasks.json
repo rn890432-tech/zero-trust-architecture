@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Test FastAPI endpoints with curl",
+			"type": "shell",
+			"command": "curl https://powerful-crag-32515-746bfe377fb4.herokuapp.com/ &&\ncurl -X POST https://powerful-crag-32515-746bfe377fb4.herokuapp.com/api/submit_feedback -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.odcuX-3XYfCfAJ3nks4b8kWfmFQJaZMEDcewwSM69R4\" -H \"Content-Type: application/json\" -d '{\"feedback\":\"Test feedback\",\"user_id\":\"user123\"}' &&\ncurl -X GET https://powerful-crag-32515-746bfe377fb4.herokuapp.com/api/fetch_feedback -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.odcuX-3XYfCfAJ3nks4b8kWfmFQJaZMEDcewwSM69R4\" &&\ncurl -X POST https://powerful-crag-32515-746bfe377fb4.herokuapp.com/api/retrain_model -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.odcuX-3XYfCfAJ3nks4b8kWfmFQJaZMEDcewwSM69R4\" -H \"Content-Type: application/json\" -d '[{\"feedback\":\"Test feedback\",\"user_id\":\"user123\"}]' &&\ncurl -X GET https://powerful-crag-32515-746bfe377fb4.herokuapp.com/api/insights -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.odcuX-3XYfCfAJ3nks4b8kWfmFQJaZMEDcewwSM69R4\" &&\ncurl -X GET https://powerful-crag-32515-746bfe377fb4.herokuapp.com/api/live_accuracy -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.odcuX-3XYfCfAJ3nks4b8kWfmFQJaZMEDcewwSM69R4\" &&\ncurl -X GET https://powerful-crag-32515-746bfe377fb4.herokuapp.com/api/audit_trail -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.odcuX-3XYfCfAJ3nks4b8kWfmFQJaZMEDcewwSM69R4\" &&\ncurl -X POST https://powerful-crag-32515-746bfe377fb4.herokuapp.com/block-domain -H \"Content-Type: application/json\" -d '{\"domain\":\"example.com\"}'",
+			"isBackground": false,
+			"group": "test"
+		}
+	]
+}

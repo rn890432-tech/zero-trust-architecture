@@ -18,7 +18,7 @@ Please fill out this form to provide all necessary information for a smooth and 
 - [x] Access to repositories/tools granted? (Y/N): Yes
 - [x] Any special permissions required? No
 
-## 4. Sample Packages
+## 4. Sample Packages & Data
 - [x] Attach a sample package (files, checklist, report): Sample checklist included in repo
 - [x] List any templates or naming conventions in use: Standard naming (YYYY-MM-DD-report)
 
@@ -27,14 +27,20 @@ Please fill out this form to provide all necessary information for a smooth and 
 - [x] Retention policies: 90 days
 
 ## 6. Preferred Communication Channels
-- [x] Slack
+- [x] Slack (e.g., #compliance-channel in WorkspaceName)
 
 ---
 
 **Additional Notes:**
 
-- 
+- Reserved for any additional context or information that may be necessary outside the structured sections.
 
 ---
+
+**Next Steps:**
+- Upon submission, the implementation lead will:
+  - Review the details provided in this form.
+  - Set up the automated validation, alerting, and audit workflow.
+  - Confirm any further action items or follow-ups.
 
 *Please return this completed form to the implementation lead to begin setup.*

@@ -1,0 +1,71 @@
+# .github/workflows/intake-validation.yml
+
+name: Intake Validation and Audit Evidence
+
+on:
+  push:
+    paths:
+      - 'Implementation_Intake_Checklist.md'
+      - 'packages/**'
+
+jobs:
+  validate-and-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Intake Checklist
+        id: validate
+        run: |
+          echo "Validating Implementation_Intake_Checklist.md..."
+          if grep -q '\[ \]' Implementation_Intake_Checklist.md; then
+            echo "::error ::Checklist incomplete. Please fill all required fields."
+            exit 1
+          fi
+          echo "Checklist complete."
+
+      - name: Archive Evidence to S3
+        if: success()
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl private --follow-symlinks
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'
+          SOURCE_DIR: './'
+          DEST_DIR: 'audit-evidence/${{ github.run_id }}/'
+
+      - name: Generate Audit Report
+        run: |
+          echo "# Audit Report" > audit_report.md
+          echo "- Run ID: ${{ github.run_id }}" >> audit_report.md
+          echo "- Timestamp: $(date -u)" >> audit_report.md
+          echo "- Actor: ${{ github.actor }}" >> audit_report.md
+          echo "- Checklist: Implementation_Intake_Checklist.md" >> audit_report.md
+          echo "- Files: $(ls packages 2>/dev/null || echo 'None')" >> audit_report.md
+
+      - name: Upload Audit Report to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl private --follow-symlinks
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'
+          SOURCE_DIR: './audit_report.md'
+          DEST_DIR: 'audit-evidence/${{ github.run_id }}/'
+
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": ":white_check_mark: Intake checklist validated and archived. Audit report generated for run ${{ github.run_id }}."
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}

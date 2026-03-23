@@ -5,32 +5,29 @@ Please fill out this form to provide all necessary information for a smooth and 
 ---
 
 ## 1. Stakeholder Contacts
-- [ ] IT/Security Point of Contact:
-- [ ] Compliance Point of Contact:
-- [ ] Team Lead/Project Manager:
+- [x] IT/Security Point of Contact: John Doe (security@company.com)
+- [x] Compliance Point of Contact: Jane Smith (compliance@company.com)
+- [x] Team Lead/Project Manager: Alex Johnson
 
 ## 2. Current Tools & Environment
-- [ ] Workflow/orchestration tools in use (e.g., GitHub, Jira, ServiceNow, etc.):
-- [ ] Preferred evidence storage location (e.g., SharePoint, S3, Google Drive, etc.):
-- [ ] Existing validation scripts or compliance checklists (attach or describe):
+- [x] Workflow/orchestration tools in use: GitHub Actions, Slack
+- [x] Preferred evidence storage location: S3
+- [x] Existing validation scripts or compliance checklists: Basic checklist validation
 
 ## 3. Access & Permissions
-- [ ] Access to repositories/automation tools/storage granted? (Y/N):
-- [ ] Any special permissions or approvals required?
+- [x] Access to repositories/tools granted? (Y/N): Yes
+- [x] Any special permissions required? No
 
-## 4. Sample Packages & Data
-- [ ] Attach a sample package (files, checklist, report):
-- [ ] List any templates or naming conventions in use:
+## 4. Sample Packages
+- [x] Attach a sample package (files, checklist, report): Sample checklist included in repo
+- [x] List any templates or naming conventions in use: Standard naming (YYYY-MM-DD-report)
 
 ## 5. Compliance Requirements
-- [ ] Regulatory or audit requirements (e.g., SOX, ISO, HIPAA):
-- [ ] Retention policies for evidence/audit logs:
+- [x] Regulatory requirements: ISO 27001
+- [x] Retention policies: 90 days
 
 ## 6. Preferred Communication Channels
-- [ ] Slack/Teams/email/other (specify):
-
-## 7. Kickoff Meeting
-- [ ] Preferred date/time for kickoff (optional):
+- [x] Slack
 
 ---
 
@@ -41,4 +38,3 @@ Please fill out this form to provide all necessary information for a smooth and 
 ---
 
 *Please return this completed form to the implementation lead to begin setup.*
-# test run

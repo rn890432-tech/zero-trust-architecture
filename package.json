@@ -1,0 +1,10 @@
+{
+  "name": "zero-trust-architecture",
+  "version": "1.0.0",
+  "description": "CI/CD workflow project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "dependencies": {}
+}
